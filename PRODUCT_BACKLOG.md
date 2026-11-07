@@ -68,3 +68,27 @@ Mettre en place une application qui améliore la gestion quotidienne du stock, l
 ## 7. Remarque
 
 Ce Product Backlog est une première base de travail. Il pourra être ajusté et complété après validation des besoins réels de la boutique avec les utilisateurs.
+
+## 8. Design - Boutique Liberation - Par Ingenieur Ova, Designer
+
+### A. Ecran d'accueil / Catalogue Client
+- Top Bar : Logo a gauche, Barre de recherche, Panier avec badge rouge
+- Filtres : Tous, Homme, Femme, Sport, Cuir
+- Grille Produits : Photo, Nom, Couleur, Prix en $, Badge Plus que 2 ou Epuise, Bouton Ajouter avec Pointure
+
+### B. Panier et Commande
+- Tableau : Modele, Pointure, Prix, Bouton Retirer
+- Paiement : Nom, Numero de telephone, Airtel Money, Orange Money, M-Pesa, Paiement a la livraison
+- Bouton : Valider le paiement
+
+### C. Espace Administrateur - Dashboard
+- KPI : Ventes du jour, Chiffre d'affaires, Benefice net, Total en stock
+- Alerte rouge si stock inferieur ou egal a 2
+
+### D. Gestion des Produits et Stocks
+- Formulaire : Nom, Categorie, Prix d'achat, Prix de vente, Pointure, Quantite, Photo
+- Tableau par pointure : Exemple T40 : 3, T41 : 0 barre si epuise
+
+
+
+
