@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="BOUTIQUE LIBERATION, boutique de chaussures à Lubumbashi.">
+<title>BOUTIQUE LIBERATION | Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}"></head><body>
+<header class="topbar"><a class="brand" href="/"><span class="brand-mark">BL</span><span>BOUTIQUE <b>LIBERATION</b></span></a>
+<nav><a class="active" href="#accueil">Accueil</a><a href="#catalogue">Catalogue</a><a href="#apropos">À propos</a></nav>
+<a class="admin-link" href="/admin">Administration ↗</a></header>
+<main><section class="hero" id="accueil"><div><p class="eyebrow">LE STYLE À CHAQUE PAS</p>
+<h1>Marchez avec<br><em>confiance.</em></h1><p class="hero-text">Découvrez notre sélection de chaussures pensées pour votre style, votre confort et votre quotidien.</p>
+<a class="primary-btn" href="#catalogue">Découvrir la collection <span>→</span></a>
+<div class="hero-note"><span class="note-line"></span> Votre boutique de chaussures à Lubumbashi</div></div>
+<div class="hero-art"><div class="hero-circle"></div><div class="hero-label">COLLECTION<br><strong>2026</strong></div><div class="shoe-emoji">👟</div><div class="hero-stamp">STYLE<br>•<br>QUALITÉ</div></div></section>
+<section class="catalog-section" id="catalogue"><div class="section-heading"><div><p class="eyebrow">TROUVEZ VOTRE STYLE</p><h2>Notre collection</h2></div><p class="muted">Des modèles sélectionnés pour vous.</p></div>
+<div class="toolbar"><div class="filters"><button class="filter-btn selected" data-filter="Tous">Tout voir</button><button class="filter-btn" data-filter="Homme">Homme</button><button class="filter-btn" data-filter="Femme">Femme</button><button class="filter-btn" data-filter="Sport">Sport</button></div>
+<label class="search-box">⌕ <input id="searchInput" type="search" placeholder="Rechercher un modèle..."></label></div>
+<div class="product-grid" id="productGrid">{% for p in produits %}
+<article class="product-card" data-category="{{ p.categorie }}" data-name="{{ p.nom|lower }}"><div class="product-image"><span class="shoe-placeholder">👟</span>
+<span class="category-tag">{{ p.categorie }}</span>{% if p.quantite == 0 %}<span class="stock-tag out">Épuisé</span>{% elif p.quantite <= 2 %}<span class="stock-tag low">Dernières pièces</span>{% endif %}</div>
+<div class="product-info"><h3>{{ p.nom }}</h3><p>{{ p.description }}</p><div class="product-bottom"><strong>{{ "%.2f"|format(p.prix) }} $</strong><span>Pointures : {{ p.pointure or 'À confirmer' }}</span></div>
+<button class="add-btn" {% if p.quantite == 0 %}disabled{% endif %} data-name="{{ p.nom }}" data-price="{{ p.prix }}">Ajouter à ma sélection <span>＋</span></button></div></article>
+{% else %}<p>Aucun produit enregistré.</p>{% endfor %}</div><p class="cart-message" id="cartMessage" aria-live="polite"></p></section>
+<section class="about-strip" id="apropos"><div><p class="eyebrow">BOUTIQUE LIBERATION</p><h2>Le bon choix,<br><em>à chaque pas.</em></h2></div><p>Une sélection de chaussures pour toutes les occasions. Retrouvez nos nouveautés et faites votre choix en toute simplicité.</p></section></main>
+<footer><a class="brand" href="#accueil"><span class="brand-mark">BL</span><span>BOUTIQUE <b>LIBERATION</b></span></a><p>© 2026 BOUTIQUE LIBERATION · Lubumbashi, RDC</p></footer>
+<script src="{{ url_for('static',filename='js/app.js') }}"></script></body></html>
