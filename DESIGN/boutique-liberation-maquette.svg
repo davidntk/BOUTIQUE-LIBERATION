@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+<defs>
+ <linearGradient id="pink" x2="1" y2="1"><stop stop-color="#ff0870"/><stop offset="1" stop-color="#d90043"/></linearGradient>
+ <linearGradient id="yellow" x2="1" y2="1"><stop stop-color="#ffe65a"/><stop offset="1" stop-color="#ffbd00"/></linearGradient>
+ <style>
+ .brand{font:900 30px Arial,sans-serif;fill:#111}.sub{font:700 13px Arial;fill:#555}
+ .nav{font:700 17px Arial;fill:#fff}.h{font:900 25px Arial;fill:#111}.t{font:600 15px Arial;fill:#222}.small{font:500 12px Arial;fill:#333}.price{font:900 19px Arial;fill:#df003d}
+ .panel{fill:#fff;stroke:#ddd;stroke-width:2}.btn{fill:url(#pink)}.white{fill:#fff}
+ </style>
+</defs>
+<rect width="1600" height="1200" fill="#f4f2f2"/>
+<!-- six screen panels -->
+<g transform="translate(20 20)">
+ <rect class="panel" width="760" height="360" rx="16"/>
+ <rect width="760" height="68" rx="14" fill="#fff"/>
+ <text x="25" y="39" class="brand">🛍 BOUTIQUE</text><text x="25" y="61" font-family="Arial" font-size="21" font-weight="900" fill="#df003d">LIBÉRATION</text>
+ <text x="330" y="42" class="small">Rechercher un produit…</text><rect x="315" y="17" width="235" height="35" rx="18" fill="#f4f4f4" stroke="#ddd"/>
+ <text x="585" y="40" class="t">Compte　 Panier</text>
+ <rect y="68" width="760" height="38" fill="#111"/><rect y="68" width="120" height="38" fill="url(#pink)"/>
+ <text x="20" y="93" class="nav">Accueil</text><text x="150" y="93" class="nav">Hommes⌄</text><text x="270" y="93" class="nav">Femmes⌄</text><text x="400" y="93" class="nav">Panier</text><text x="495" y="93" class="nav">Paiement</text><text x="615" y="93" class="nav">Admin</text>
+ <rect x="0" y="106" width="760" height="254" fill="#f8d8df"/>
+ <rect x="0" y="106" width="760" height="254" fill="url(#yellow)" opacity=".25"/>
+ <text x="35" y="173" font-family="Arial" font-size="40" font-weight="900" fill="#111">MODE • ÉLÉGANCE</text><text x="35" y="219" font-family="Arial" font-size="45" font-weight="900" fill="#df003d">LIBÉRATION</text>
+ <text x="38" y="252" class="t">La mode qui vous ressemble, à Lubumbashi.</text>
+ <rect x="35" y="275" width="190" height="43" rx="22" class="btn"/><text x="59" y="303" font-family="Arial" font-size="16" font-weight="800" fill="#fff">Découvrir la boutique</text>
+ <g transform="translate(485 120)"><circle cx="100" cy="75" r="55" fill="#b96b42"/><path d="M42 68 Q50 0 120 24 Q155 35 157 82" fill="#171717"/><path d="M40 145 Q100 100 165 145 L190 235 L15 235Z" fill="#df174f"/><circle cx="190" cy="105" r="36" fill="#d69a6e"/><path d="M157 95 Q160 45 205 65 Q232 82 220 120" fill="#21150f"/></g>
+</g>
+<g transform="translate(820 20)">
+ <rect class="panel" width="760" height="360" rx="16"/><text x="25" y="45" class="brand">BOUTIQUE LIBÉRATION</text>
+ <rect y="68" width="760" height="38" fill="#111"/><text x="20" y="93" class="nav">Accueil　 Hommes　 Femmes　 Panier　 Paiement　 Admin</text>
+ <text x="260" y="145" class="h">NOS CATÉGORIES</text>
+ <rect x="25" y="165" width="345" height="175" rx="15" fill="#171717"/><rect x="390" y="165" width="345" height="175" rx="15" fill="url(#pink)"/>
+ <text x="145" y="205" font-family="Arial" font-size="27" font-weight="900" fill="#ffdf30">HOMMES</text><text x="510" y="205" font-family="Arial" font-size="27" font-weight="900" fill="#fff">FEMMES</text>
+ <text x="55" y="240" class="nav">✓ Polos　 ✓ Chemises　 ✓ Lacoste</text><text x="55" y="270" class="nav">✓ Pantalons　 ✓ Tissus　 ✓ Jeans tissus</text><text x="55" y="300" class="nav">✓ Chaussures hommes　 ✓ Cuirs</text>
+ <text x="420" y="240" class="nav">✓ Robes　 ✓ Pagnes　 ✓ Jupes</text><text x="420" y="270" class="nav">✓ Polos femmes　 ✓ Bodys</text><text x="420" y="300" class="nav">✓ Chaussures femmes　 ✓ New Balance</text>
+</g>
+<g transform="translate(20 405)">
+ <rect class="panel" width="760" height="355" rx="16"/><text x="25" y="48" class="h">★ PRODUITS POPULAIRES</text>
+ <g transform="translate(20 75)">
+  <g><rect width="130" height="190" rx="10" fill="#f4e5df"/><circle cx="65" cy="55" r="34" fill="#a96845"/><path d="M27 95 L103 95 L115 180 L15 180Z" fill="#111"/><text x="7" y="215" class="small">Polo Lacoste</text><text x="8" y="239" class="price">45 000 CDF</text></g>
+  <g transform="translate(145)"><rect width="130" height="190" rx="10" fill="#f7e4ea"/><circle cx="65" cy="55" r="34" fill="#a96f4c"/><path d="M35 92 L95 92 L120 180 L10 180Z" fill="#df174f"/><text x="8" y="215" class="small">Robe africaine</text><text x="8" y="239" class="price">35 000 CDF</text></g>
+  <g transform="translate(290)"><rect width="130" height="190" rx="10" fill="#e5e8ed"/><path d="M35 15 L95 15 L110 180 L20 180Z" fill="#28517c"/><text x="8" y="215" class="small">Jean tissu</text><text x="8" y="239" class="price">40 000 CDF</text></g>
+  <g transform="translate(435)"><rect width="130" height="190" rx="10" fill="#f7e4ea"/><circle cx="65" cy="55" r="34" fill="#b77c5b"/><path d="M35 92 L95 92 L120 180 L10 180Z" fill="#ff0870"/><text x="8" y="215" class="small">Robe élégante</text><text x="8" y="239" class="price">38 000 CDF</text></g>
+  <g transform="translate(580)"><rect width="130" height="190" rx="10" fill="#eee"/><path d="M15 90 Q45 70 65 105 Q85 70 115 90 L110 155 Q65 180 20 155Z" fill="#fff" stroke="#bbb" stroke-width="4"/><text x="8" y="215" class="small">Baskets femmes</text><text x="8" y="239" class="price">75 000 CDF</text></g>
+ </g>
+</g>
+<g transform="translate(820 405)">
+ <rect class="panel" width="760" height="355" rx="16"/><text x="25" y="45" class="h">PAGE PRODUIT</text>
+ <rect x="25" y="70" width="315" height="255" rx="12" fill="#eee"/><circle cx="180" cy="145" r="48" fill="#a96b4a"/><path d="M115 205 L245 205 L280 320 L80 320Z" fill="#fff" stroke="#ddd" stroke-width="2"/>
+ <text x="380" y="100" class="h">Polo Lacoste Homme</text><text x="380" y="145" class="price">45 000 CDF</text><text x="380" y="180" class="t">Taille :　S　 M　 L　 XL</text><text x="380" y="220" class="t">Couleur :　⚪　⚫　🔴　🟡</text><text x="380" y="260" class="t">Quantité :　 −　 1　 +</text>
+ <rect x="375" y="280" width="330" height="45" rx="22" class="btn"/><text x="430" y="309" font-family="Arial" font-size="17" font-weight="800" fill="#fff">Ajouter au panier</text>
+</g>
+<g transform="translate(20 785)">
+ <rect class="panel" width="760" height="385" rx="16"/><text x="25" y="48" class="h">🛒 MON PANIER</text>
+ <rect x="25" y="75" width="710" height="42" fill="#f5f5f5"/><text x="45" y="102" class="t">Produit</text><text x="350" y="102" class="t">Prix</text><text x="500" y="102" class="t">Quantité</text><text x="650" y="102" class="t">Total</text>
+ <text x="45" y="160" class="t">Polo Lacoste Homme</text><text x="350" y="160" class="t">45 000 CDF</text><text x="510" y="160" class="t">−　1　+</text><text x="650" y="160" class="t">45 000</text>
+ <path d="M25 180 H735" stroke="#ddd"/><text x="45" y="225" class="t">Robe élégante</text><text x="350" y="225" class="t">38 000 CDF</text><text x="510" y="225" class="t">−　1　+</text><text x="650" y="225" class="t">38 000</text>
+ <text x="435" y="300" class="h">Total : <tspan fill="#df003d">83 000 CDF</tspan></text><rect x="485" y="320" width="250" height="45" rx="22" class="btn"/><text x="520" y="349" font-family="Arial" font-size="16" font-weight="800" fill="#fff">Passer la commande</text>
+</g>
+<g transform="translate(820 785)">
+ <rect class="panel" width="760" height="385" rx="16"/><rect width="190" height="385" rx="14" fill="#171717"/><text x="22" y="48" font-family="Arial" font-size="22" font-weight="900" fill="#fff">AWA ADMIN</text><text x="25" y="100" class="nav">Tableau de bord</text><text x="25" y="145" class="nav">Produits</text><text x="25" y="185" class="nav">Catégories</text><text x="25" y="225" class="nav">Commandes</text><text x="25" y="265" class="nav">Clients</text><text x="25" y="305" class="nav">Rapports</text>
+ <text x="220" y="45" class="h">TABLEAU DE BORD</text>
+ <g transform="translate(220 70)"><rect width="120" height="82" rx="10" fill="url(#pink)"/><rect x="135" width="120" height="82" rx="10" fill="url(#yellow)"/><rect x="270" width="120" height="82" rx="10" fill="#171717"/><rect x="405" width="120" height="82" rx="10" fill="#e50035"/>
+ <text x="15" y="35" font-family="Arial" font-size="24" font-weight="900" fill="#fff">1 250</text><text x="15" y="60" font-family="Arial" font-size="13" font-weight="700" fill="#fff">Commandes</text>
+ <text x="150" y="35" font-family="Arial" font-size="24" font-weight="900" fill="#111">8 720</text><text x="150" y="60" font-family="Arial" font-size="13" font-weight="700" fill="#111">Clients</text>
+ <text x="290" y="35" font-family="Arial" font-size="24" font-weight="900" fill="#fff">520</text><text x="290" y="60" font-family="Arial" font-size="13" font-weight="700" fill="#fff">Produits</text>
+ <text x="420" y="35" font-family="Arial" font-size="22" font-weight="900" fill="#fff">12,5 M</text><text x="420" y="60" font-family="Arial" font-size="13" font-weight="700" fill="#fff">CDF ventes</text></g>
+ <text x="220" y="190" class="t">Ventes sur 30 jours</text><path d="M230 320 L275 285 L320 300 L365 255 L410 270 L455 230 L500 260 L545 215 L590 245 L650 205 L720 225" fill="none" stroke="#ef0754" stroke-width="5"/><path d="M230 320 L275 285 L320 300 L365 255 L410 270 L455 230 L500 260 L545 215 L590 245 L650 205 L720 225 L720 350 L230 350Z" fill="#ff0870" opacity=".12"/>
+</g>
+</svg>
