@@ -1,4 +1,4 @@
-"""Application web Boutique Liberation avec authentification administrateur."""
+"""Application web Boutique Liberation : vitrine publique et administration protégée."""
 import hashlib
 import hmac
 import os
@@ -15,13 +15,11 @@ app.config.update(
     JSON_AS_ASCII=False,
 )
 
-# Mot de passe stocké sous forme de hash PBKDF2-SHA256, jamais en clair.
 ADMIN_USERNAME = "david"
 PASSWORD_HASH = "pbkdf2_sha256$600000$28fbd5d675d4fc03836c9eb91f4fd1d7$a414bd8aa8754f48c94aac857f36e76b242f53a655e7657654647c6b8fe7add2"
 
 
 def verify_password(password):
-    """Compare le mot de passe fourni au hash enregistré."""
     algorithm, iterations, salt, expected = PASSWORD_HASH.split("$")
     if algorithm != "pbkdf2_sha256":
         return False
@@ -32,18 +30,23 @@ def verify_password(password):
 
 
 @app.before_request
-def require_login():
-    """Protège l'espace de gestion et laisse accessibles login, santé et fichiers statiques."""
-    if request.endpoint in {"login", "health", "static"}:
+def require_admin_login():
+    """La vitrine est publique ; seules les routes d'administration exigent une session."""
+    if request.endpoint in {"store", "login", "health", "static"}:
         return None
-    if not session.get("authenticated"):
+    if request.endpoint == "admin" and not session.get("authenticated"):
         return redirect(url_for("login", next=request.path))
     return None
 
 
+@app.get("/")
+def store():
+    """Vitrine publique accessible sans connexion."""
+    return render_template("store.html")
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Authentifie l'administrateur."""
     error = None
     if request.method == "POST":
         username = request.form.get("username", "").strip()
@@ -52,35 +55,30 @@ def login():
             session.clear()
             session["authenticated"] = True
             session["username"] = ADMIN_USERNAME
-            return redirect(url_for("index"))
+            destination = request.form.get("next", "")
+            if not destination.startswith("/admin"):
+                destination = url_for("admin")
+            return redirect(destination)
         error = "Nom d'utilisateur ou mot de passe incorrect."
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, next=request.args.get("next", ""))
+
+
+@app.get("/admin")
+def admin():
+    """Interface de gestion réservée à l'administrateur."""
+    return render_template("index.html")
 
 
 @app.post("/logout")
 def logout():
-    """Ferme la session administrateur."""
     session.clear()
-    return redirect(url_for("login"))
-
-
-@app.get("/")
-def index():
-    """Affiche l'interface de gestion et la boutique client."""
-    return render_template("index.html")
+    return redirect(url_for("store"))
 
 
 @app.get("/health")
 def health():
-    """Vérifie que le serveur répond correctement."""
     return jsonify({"status": "ok", "application": "BOUTIQUE LIBERATION"})
 
 
-@app.errorhandler(404)
-def not_found(_error):
-    return render_template("index.html"), 404
-
-
 if __name__ == "__main__":
-    # Pour le développement local uniquement. En production, définir FLASK_SECRET_KEY.
     app.run(host="0.0.0.0", port=5000, debug=False)
