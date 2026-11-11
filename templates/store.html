@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Découvrez les chaussures de Boutique Liberation.">
+  <title>Boutique Liberation — Collection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .public-wrap{max-width:1200px;margin:auto;padding:28px 22px 60px}
+    .public-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;background:#172331;color:#fff}
+    .public-logo{font-weight:800;letter-spacing:2px}.public-logo span{color:#c69a5b}
+    .public-hero{padding:64px 38px;margin:24px 0;border-radius:18px;background:linear-gradient(120deg,#172331,#304153);color:white}
+    .public-hero h1{font:800 clamp(32px,5vw,54px) Manrope, sans-serif;max-width:650px;line-height:1.1}
+    .public-hero p{color:#e1e5ea;max-width:520px;line-height:1.7}
+    .public-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:22px}
+    .public-actions a{color:#172331;background:#c69a5b;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:800}
+    .public-actions .admin-link{background:transparent;color:#fff;border:1px solid #ffffff55}
+    .public-section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:30px 0 18px}
+    .public-tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .public-tools input,.public-tools select{min-width:190px}
+    .public-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .public-card{background:white;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .public-image{height:210px;background:#f1eee8;display:grid;place-items:center;font-size:68px}
+    .public-image img{width:100%;height:100%;object-fit:cover}
+    .public-info{padding:16px}.public-info h3{margin:0 0 7px}
+    .public-price{font-size:21px;font-weight:800;margin:12px 0}
+    .public-info button{background:#172331;color:white;width:100%}
+    .public-footer{text-align:center;color:#788391;padding:30px 10px;font-size:12px}
+    @media(max-width:760px){.public-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.public-hero{padding:38px 22px}}
+    @media(max-width:480px){.public-grid{grid-template-columns:1fr}.public-image{height:230px}.public-section-head{align-items:start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <nav class="public-nav"><div class="public-logo">BOUTIQUE <span>LIBERATION</span></div><a class="admin-link" href="/login" style="color:#fff;text-decoration:none">Espace admin</a></nav>
+  <main class="public-wrap">
+    <section class="public-hero">
+      <div class="eyebrow">Nouvelle collection</div>
+      <h1>Le style qui vous ressemble.</h1>
+      <p>Découvrez notre sélection de chaussures pour chaque occasion. Trouvez votre modèle et votre pointure.</p>
+      <div class="public-actions"><a href="#collection">Découvrir la collection</a><a class="admin-link" href="/login">Connexion administrateur</a></div>
+    </section>
+    <div class="public-section-head" id="collection"><div><div class="eyebrow">Boutique en ligne</div><h2>Nos chaussures</h2><p class="muted">Les modèles disponibles chez Boutique Liberation.</p></div></div>
+    <div class="public-tools"><input id="search" class="field" placeholder="Rechercher un modèle..."><select id="category" class="field"><option value="">Toutes les catégories</option><option>Homme</option><option>Femme</option><option>Sport</option><option>Cuir</option></select></div>
+    <div class="public-grid" id="products"><p class="muted">Chargement des produits…</p></div>
+    <div class="public-footer">© <span id="year"></span> Boutique Liberation · Tous droits réservés</div>
+  </main>
+  <script>
+    const KEY='boutique_liberation_data';
+    const initial=[
+      {name:'Runner Classic',cat:'Sport',price:49,emoji:'👟',sizes:{39:2,40:4,41:3,42:2}},
+      {name:'Urban Leather',cat:'Homme',price:79,emoji:'👞',sizes:{40:2,41:3,42:1,43:2}},
+      {name:'Luna Elegance',cat:'Femme',price:65,emoji:'👠',sizes:{36:3,37:4,38:2,39:1}},
+      {name:'Street Flex',cat:'Sport',price:45,emoji:'🥾',sizes:{39:1,40:2,41:0,42:0}}
+    ];
+    const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    let products=[];
+    try{const saved=JSON.parse(localStorage.getItem(KEY));products=saved&&Array.isArray(saved.products)?saved.products:initial}catch(e){products=initial}
+    function render(){
+      const q=document.getElementById('search').value.toLowerCase(),cat=document.getElementById('category').value;
+      const list=products.filter(p=>(!cat||p.cat===cat)&&(!q||p.name.toLowerCase().includes(q)));
+      document.getElementById('products').innerHTML=list.length?list.map(p=>{
+        const stock=Object.values(p.sizes||{}).reduce((a,b)=>a+Number(b),0);
+        const image=p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'">':esc(p.emoji||'👟');
+        const sizes=Object.entries(p.sizes||{}).filter(([,n])=>Number(n)>0).map(([s])=>s).join(', ');
+        return '<article class="public-card"><div class="public-image">'+image+'</div><div class="public-info"><small class="eyebrow">'+esc(p.cat||'Chaussures')+'</small><h3>'+esc(p.name)+'</h3><div class="muted">Pointures : '+(sizes||'Indisponible')+'</div><div class="public-price">$'+Number(p.price||0).toFixed(2)+'</div><div class="muted">'+(stock>0?stock+' en stock':'Rupture de stock')+'</div></div></article>';
+      }).join(''):'<p class="muted">Aucun produit ne correspond à votre recherche.</p>';
+    }
+    document.getElementById('search').addEventListener('input',render);
+    document.getElementById('category').addEventListener('change',render);
+    document.getElementById('year').textContent=new Date().getFullYear();
+    render();
+  </script>
+</body>
+</html>
