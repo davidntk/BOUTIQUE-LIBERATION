@@ -3,23 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Connexion — BOUTIQUE LIBERATION</title>
+  <title>Accès administrateur — BOUTIQUE LIBERATION</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="login-page">
   <main class="login-card">
     <div class="login-logo">BL</div>
     <div class="eyebrow">Espace administrateur</div>
-    <h1>Bienvenue</h1>
-    <p class="muted">Connectez-vous pour gérer votre boutique.</p>
+    <h1>Accès sécurisé</h1>
+    <p class="muted">Entrez votre code confidentiel pour gérer la boutique.</p>
     {% if error %}<div class="login-error" role="alert">{{ error }}</div>{% endif %}
     <form method="post" action="{{ url_for('login') }}" class="login-form">
-      <label for="username">Nom d'utilisateur</label>
-      <input id="username" name="username" class="field" autocomplete="username" required autofocus>
-      <label for="password">Mot de passe</label>
-      <input id="password" name="password" type="password" class="field" autocomplete="current-password" required>
-      <button class="gold" type="submit">Se connecter</button>
+      <label for="access_code">Code d'accès</label>
+      <input id="access_code" name="access_code" type="password" class="field" inputmode="numeric" autocomplete="current-password" placeholder="Votre code administrateur" required autofocus>
+      <button class="gold" type="submit">Entrer dans l'administration</button>
     </form>
+    <p style="text-align:center;margin-top:18px"><a href="{{ url_for('store') }}">← Retour à la boutique</a></p>
     <small class="login-footer">BOUTIQUE LIBERATION · Gestion sécurisée</small>
   </main>
 </body>
