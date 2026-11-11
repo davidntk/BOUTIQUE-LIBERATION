@@ -49,9 +49,8 @@ def store():
 def login():
     error = None
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-        if hmac.compare_digest(username, ADMIN_USERNAME) and verify_password(password):
+        access_code = request.form.get("access_code", "")
+        if verify_password(access_code):
             session.clear()
             session["authenticated"] = True
             session["username"] = ADMIN_USERNAME
