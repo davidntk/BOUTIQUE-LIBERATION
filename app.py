@@ -115,6 +115,51 @@ def index():
         by_product.setdefault(row["product_id"], []).append(row)
     return render_template("index.html", products=products, sizes=by_product, q=term, category=category)
 
+
+@app.route("/acheter/<int:product_id>", methods=["POST"])
+def buy_product(product_id):
+    """Permet au client de commander directement depuis le catalogue public."""
+    conn = db()
+    try:
+        size = request.form.get("size", "").strip()
+        qty = int(request.form.get("quantity", "1"))
+        customer = request.form.get("customer_name", "").strip() or "Client en ligne"
+        phone = request.form.get("phone", "").strip()
+        payment = request.form.get("payment_method", "Paiement à la livraison")
+        allowed_payments = ("Espèces", "Airtel Money", "Orange Money", "M-Pesa", "Paiement à la livraison")
+        if qty < 1 or payment not in allowed_payments or not size:
+            raise ValueError("Vérifie la pointure, la quantité et le mode de paiement.")
+        product = conn.execute("SELECT * FROM products WHERE id=?", (product_id,)).fetchone()
+        stock_row = conn.execute(
+            "SELECT quantity FROM stock WHERE product_id=? AND size=?",
+            (product_id, size)
+        ).fetchone()
+        if not product or not stock_row or stock_row["quantity"] < qty:
+            raise ValueError("Cette pointure n'est pas disponible en quantité suffisante.")
+        total = product["sale_price"] * qty
+        cur = conn.execute(
+            "INSERT INTO sales(customer_name,phone,total,payment_method) VALUES(?,?,?,?)",
+            (customer, phone, total, payment)
+        )
+        conn.execute(
+            "INSERT INTO sale_items(sale_id,product_id,size,quantity,unit_price) VALUES(?,?,?,?,?)",
+            (cur.lastrowid, product_id, size, qty, product["sale_price"])
+        )
+        conn.execute(
+            "UPDATE stock SET quantity=quantity-? WHERE product_id=? AND size=?",
+            (qty, product_id, size)
+        )
+        conn.execute(
+            "INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
+            (product_id, size, qty, "SORTIE", "Commande client en ligne #" + str(cur.lastrowid))
+        )
+        conn.commit()
+        flash("Commande enregistrée avec succès ! Votre numéro de commande est #" + str(cur.lastrowid), "success")
+    except (ValueError, KeyError, sqlite3.Error) as exc:
+        conn.rollback()
+        flash(str(exc) or "Impossible d'enregistrer la commande.", "error")
+    return redirect(url_for("index") + "#catalogue")
+
 @app.route("/login", methods=["GET","POST"])
 def login():
     if request.method == "POST":
