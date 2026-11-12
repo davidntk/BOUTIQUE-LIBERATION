@@ -1,20 +1,49 @@
 import os
-import sqlite3
+import mysql.connector
 from functools import wraps
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, abort
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-# Base SQLite stockée localement sur cet ordinateur. DATABASE_PATH est facultatif.
-DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "boutique.db"))
+# Connexion MySQL locale (XAMPP).
+MYSQL_HOST = os.environ.get("MYSQL_HOST", "127.0.0.1")
+MYSQL_PORT = int(os.environ.get("MYSQL_PORT", "3306"))
+MYSQL_USER = os.environ.get("MYSQL_USER", "root")
+MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
+MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "boutique_liberation")
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key-before-deployment")
 
+class HybridRow(dict):
+    def __getitem__(self, key):
+        return list(self.values())[key] if isinstance(key, int) else super().__getitem__(key)
+
+class CursorAdapter:
+    def __init__(self, cursor):
+        self.cursor = cursor
+        self.lastrowid = cursor.lastrowid
+    def fetchone(self):
+        row = self.cursor.fetchone()
+        return HybridRow(row) if row is not None else None
+    def fetchall(self):
+        return [HybridRow(row) for row in self.cursor.fetchall()]
+
+class MySQLConnectionAdapter:
+    def __init__(self, connection):
+        self.connection = connection
+    def execute(self, sql, params=()):
+        cursor = self.connection.cursor(dictionary=True)
+        cursor.execute(sql.replace('?', '%s'), params)
+        return CursorAdapter(cursor)
+    def commit(self): self.connection.commit()
+    def rollback(self): self.connection.rollback()
+    def close(self): self.connection.close()
+
 def db():
-    if "db" not in g:
-        g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute("PRAGMA foreign_keys = ON")
+    if 'db' not in g:
+        connection = mysql.connector.connect(host=MYSQL_HOST, port=MYSQL_PORT, user=MYSQL_USER,
+            password=MYSQL_PASSWORD, database=MYSQL_DATABASE, charset='utf8mb4', autocommit=False)
+        g.db = MySQLConnectionAdapter(connection)
     return g.db
 
 @app.teardown_appcontext
@@ -24,37 +53,29 @@ def close_db(error=None):
         conn.close()
 
 def init_db():
-    """Crée la base SQLite locale à partir du fichier database/schema.sql."""
-    os.makedirs(os.path.dirname(os.path.abspath(DATABASE)), exist_ok=True)
-    schema_path = os.path.join(BASE_DIR, "database", "schema.sql")
-    conn = sqlite3.connect(DATABASE)
-    conn.execute("PRAGMA foreign_keys = ON")
+    """Vérifie MySQL et ajoute des données de démonstration si la base est vide.
+    Importez d'abord database/schema_mysql.sql dans phpMyAdmin.
+    """
+    conn = db()
     try:
-        with open(schema_path, "r", encoding="utf-8") as schema_file:
-            conn.executescript(schema_file.read())
-
-        # Compte de démonstration et produits d'exemple au premier démarrage.
-        conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES(?,?,?)",
-                     ("admin", "admin123", "admin"))
-        count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+        conn.execute('INSERT IGNORE INTO users(username,password,role) VALUES(?,?,?)',
+                     ('admin', 'admin123', 'admin'))
+        count = conn.execute('SELECT COUNT(*) AS total FROM products').fetchone()['total']
         if count == 0:
             samples = [
-                ("Sneakers Urban", "Homme", "Blanc", 18, 35, "", "Chaussure urbaine"),
-                ("Basket Élégance", "Femme", "Noir", 20, 39, "", "Style quotidien"),
-                ("Sport Runner", "Sport", "Bleu", 22, 42, "", "Chaussure de sport"),
-                ("Mocassin Classic", "Cuir", "Marron", 25, 48, "", "Chaussure classique")
+                ('Sneakers Urban', 'Homme', 'Blanc', 18, 35, '', 'Chaussure urbaine'),
+                ('Basket Élégance', 'Femme', 'Noir', 20, 39, '', 'Style quotidien'),
+                ('Sport Runner', 'Sport', 'Bleu', 22, 42, '', 'Chaussure de sport'),
+                ('Mocassin Classic', 'Cuir', 'Marron', 25, 48, '', 'Chaussure classique')
             ]
             for product in samples:
-                cur = conn.execute(
-                    "INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description) VALUES(?,?,?,?,?,?,?)",
-                    product
-                )
-                for size in ("38", "39", "40", "41", "42", "43"):
-                    conn.execute("INSERT INTO stock(product_id,size,quantity) VALUES(?,?,?)",
-                                 (cur.lastrowid, size, 2))
+                cur = conn.execute('INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description) VALUES(?,?,?,?,?,?,?)', product)
+                for size in ('38', '39', '40', '41', '42', '43'):
+                    conn.execute('INSERT INTO stock(product_id,size,quantity) VALUES(?,?,?)', (cur.lastrowid, size, 2))
         conn.commit()
-    finally:
-        conn.close()
+    except mysql.connector.Error:
+        conn.rollback()
+        raise
 
 def login_required(fn):
     @wraps(fn)
@@ -129,7 +150,7 @@ def buy_product(product_id):
         )
         conn.commit()
         flash("Commande enregistrée avec succès ! Votre numéro de commande est #" + str(cur.lastrowid), "success")
-    except (ValueError, KeyError, sqlite3.Error) as exc:
+    except (ValueError, KeyError, mysql.connector.Error) as exc:
         conn.rollback()
         flash(str(exc) or "Impossible d'enregistrer la commande.", "error")
     return redirect(url_for("index") + "#catalogue")
@@ -158,8 +179,8 @@ def dashboard():
     products_count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
     stock_count = conn.execute("SELECT COALESCE(SUM(quantity),0) FROM stock").fetchone()[0]
     today = datetime.now().strftime("%Y-%m-%d")
-    today_sales = conn.execute("SELECT COUNT(*) FROM sales WHERE date(created_at)=?", (today,)).fetchone()[0]
-    revenue = conn.execute("SELECT COALESCE(SUM(total),0) FROM sales WHERE date(created_at)=?", (today,)).fetchone()[0]
+    today_sales = conn.execute("SELECT COUNT(*) FROM sales WHERE DATE(created_at)=?", (today,)).fetchone()[0]
+    revenue = conn.execute("SELECT COALESCE(SUM(total),0) FROM sales WHERE DATE(created_at)=?", (today,)).fetchone()[0]
     low_stock = conn.execute("""SELECT p.name,s.size,s.quantity FROM stock s JOIN products p ON p.id=s.product_id
                                 WHERE s.quantity<=2 ORDER BY s.quantity,p.name LIMIT 12""").fetchall()
     recent = conn.execute("SELECT * FROM sales ORDER BY id DESC LIMIT 8").fetchall()
@@ -190,7 +211,7 @@ def products():
             conn.commit()
             flash("Produit ajouté avec succès.", "success")
             return redirect(url_for("products"))
-        except (ValueError, sqlite3.Error):
+        except (ValueError, mysql.connector.Error):
             conn.rollback()
             flash("Vérifie les informations et les quantités saisies.", "error")
     items = conn.execute("""SELECT p.*,COALESCE(SUM(s.quantity),0) total_stock FROM products p
@@ -223,13 +244,13 @@ def stock_page():
             else:
                 new_qty = current + qty if kind == "ENTREE" else current - qty
                 conn.execute("""INSERT INTO stock(product_id,size,quantity) VALUES(?,?,?)
-                                ON CONFLICT(product_id,size) DO UPDATE SET quantity=excluded.quantity""",
+                                ON DUPLICATE KEY UPDATE quantity=VALUES(quantity)""",
                              (product_id,size,new_qty))
                 conn.execute("INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
                              (product_id,size,qty,kind,request.form.get("reason","")))
                 conn.commit()
                 flash("Mouvement de stock enregistré.", "success")
-        except (ValueError, KeyError, sqlite3.Error):
+        except (ValueError, KeyError, mysql.connector.Error):
             conn.rollback()
             flash("Données de mouvement invalides.", "error")
         return redirect(url_for("stock_page"))
@@ -267,7 +288,7 @@ def sales_page():
             conn.commit()
             flash("Vente enregistrée. Le stock a été actualisé.", "success")
             return redirect(url_for("sales_page"))
-        except (ValueError, KeyError, sqlite3.Error) as exc:
+        except (ValueError, KeyError, mysql.connector.Error) as exc:
             conn.rollback()
             flash(str(exc) or "Impossible d'enregistrer cette vente.", "error")
     sales_list = conn.execute("SELECT * FROM sales ORDER BY id DESC LIMIT 30").fetchall()
@@ -284,5 +305,6 @@ def invoice(sale_id):
     return render_template("invoice.html", sale=sale, items=items)
 
 if __name__ == "__main__":
-    init_db()
+    with app.app_context():
+        init_db()
     app.run(host="127.0.0.1", port=5001, debug=True)
