@@ -1,0 +1,16 @@
+# Environnement Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Configuration et secrets locaux
+.env
+
+# Base SQLite locale (ne pas versionner les données clients)
+boutique.db
+boutique.db-shm
+boutique.db-wal
+database/*.db
+database/*.db-shm
+database/*.db-wal
