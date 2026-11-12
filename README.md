@@ -1,84 +1,74 @@
 # BOUTIQUE LIBERATION
 
-Application web de gestion d'une boutique de chaussures, développée avec **Python, Flask, SQLite, HTML, CSS et JavaScript**. Le périmètre suit le Product Backlog du dépôt.
+Application de gestion d'une boutique de chaussures développée avec **Python, Flask, MySQL, HTML, CSS et JavaScript**.
 
-## Fonctionnalités disponibles
-- Catalogue public et recherche de chaussures par nom/catégorie/couleur.
-- Catégories Homme, Femme, Sport et Cuir.
-- Espace administrateur protégé par une connexion.
-- Ajout et suppression de produits avec prix d'achat et de vente.
+## Fonctionnalités
+- Catalogue public et recherche de chaussures.
+- Espace administrateur.
+- Gestion des produits et des prix.
 - Gestion du stock par pointure.
-- Enregistrement des entrées et sorties et historique des mouvements.
-- Enregistrement des ventes avec contrôle de disponibilité et décrémentation automatique du stock.
-- Modes de paiement : espèces, Airtel Money, Orange Money, M-Pesa et paiement à la livraison.
-- Tableau de bord, alertes lorsque le stock d'une pointure est inférieur ou égal à 2 et facture imprimable.
+- Historique des entrées et sorties.
+- Ventes, commandes et mise à jour automatique du stock.
+- Factures imprimables et tableau de bord.
 
-## Installation Windows
-1. Installer Python 3.
-2. Ouvrir le dossier du projet dans VS Code.
-3. Dans le terminal :
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate
-   pip install -r requirements.txt
-   python app.py
-   ```
-4. Ouvrir **http://127.0.0.1:5001** dans le navigateur.
+## Installation locale avec XAMPP et MySQL
 
-La base SQLite `boutique.db` et les données de démonstration sont créées automatiquement au premier lancement.
+### 1. Démarrer MySQL
+1. Installer XAMPP.
+2. Ouvrir le panneau de contrôle XAMPP.
+3. Démarrer **MySQL** (Apache est facultatif pour Flask).
+4. Ouvrir phpMyAdmin depuis le bouton Admin de MySQL.
 
-## Connexion de démonstration
-- Identifiant : `admin`
-- Mot de passe : `admin123`
+### 2. Créer les tables
+1. Dans phpMyAdmin, ouvrir l'onglet **Importer**.
+2. Sélectionner le fichier `database/schema_mysql.sql` du projet.
+3. Cliquer sur **Importer / Exécuter**.
+4. Une base nommée `boutique_liberation` et toutes les tables seront créées.
 
-**Sécurité :** ces identifiants sont uniquement destinés aux tests locaux. Avant tout déploiement, remplacer le mot de passe de démonstration, définir une variable d'environnement `SECRET_KEY` forte et mettre en place une gestion sécurisée des mots de passe. Ne pas exposer le serveur de développement Flask sur Internet.
-
-## Structure
-```
-BOUTIQUE-LIBERATION/
-├── app.py
-├── requirements.txt
-├── PRODUCT_BACKLOG.md
-├── templates/
-│   ├── base.html
-│   ├── index.html
-│   ├── login.html
-│   ├── admin.html
-│   ├── products.html
-│   ├── stock.html
-│   ├── sales.html
-│   └── invoice.html
-└── static/
-    ├── css/style.css
-    └── js/app.js
-```
-
-## Limites de cette version
-Cette version est une base fonctionnelle de projet académique. L'authentification utilise encore un mot de passe de démonstration en clair : elle doit être renforcée avant une utilisation réelle. L'image produit est renseignée par URL (pas encore par téléversement de fichier). Le calcul du bénéfice, la gestion complète des utilisateurs et la gestion des fournisseurs restent à développer.
-## Base de données locale SQLite
-
-L'application est reliée à une base de données SQLite locale. Au premier lancement, `app.py` lit `database/schema.sql`, crée les tables et ajoute les données de démonstration si la base est vide.
-
-- Fichier de données : `boutique.db` à la racine du projet.
-- Schéma SQL : `database/schema.sql`.
-- Les ventes, produits, pointures et mouvements de stock sont enregistrés dans ce fichier sur votre ordinateur.
-- Le fichier `boutique.db` est ignoré par Git : les données privées ne sont pas envoyées sur GitHub.
-
-### Démarrer sur Windows
-
+### 3. Installer et démarrer Flask
 Dans PowerShell, depuis le dossier du projet :
 
 ```powershell
 py -m venv venv
-.\\venv\\Scripts\\Activate.ps1
+.\venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 python app.py
 ```
 
-Puis ouvrir `http://127.0.0.1:5001`.
+Ouvrir ensuite **http://127.0.0.1:5001**.
 
-### Sauvegarder la base
+Au premier démarrage, l'application crée automatiquement un compte de démonstration et quatre produits d'exemple si la table des produits est vide.
 
-Arrêter l'application, puis copier le fichier `boutique.db` dans un dossier de sauvegarde. Ne supprimez pas ce fichier si vous souhaitez conserver vos ventes et votre stock.
+## Paramètres MySQL
 
-Pour choisir un autre emplacement, définir la variable d'environnement `DATABASE_PATH` avant de lancer `python app.py`.
+Par défaut, l'application utilise les paramètres XAMPP habituels :
+- Hôte : `127.0.0.1`
+- Port : `3306`
+- Utilisateur : `root`
+- Mot de passe : vide
+- Base : `boutique_liberation`
+
+Si votre installation utilise d'autres paramètres, définissez les variables d'environnement avant de lancer Flask :
+
+```powershell
+$env:MYSQL_HOST="127.0.0.1"
+$env:MYSQL_PORT="3306"
+$env:MYSQL_USER="root"
+$env:MYSQL_PASSWORD="votre_mot_de_passe"
+$env:MYSQL_DATABASE="boutique_liberation"
+python app.py
+```
+
+Ne publiez jamais votre mot de passe MySQL sur GitHub.
+
+## Connexion administrateur de démonstration
+- Identifiant : `admin`
+- Mot de passe : `admin123`
+
+Changez ce mot de passe avant une utilisation réelle. Cette version utilise encore une authentification de démonstration simple.
+
+## Sauvegarde
+Dans phpMyAdmin, sélectionnez la base `boutique_liberation`, ouvrez **Exporter**, puis exportez-la en SQL. Les données MySQL restent sur votre ordinateur et ne sont pas enregistrées dans le dépôt GitHub.
+
+## Structure de la base
+Le script `database/schema_mysql.sql` crée les tables `users`, `products`, `stock`, `movements`, `sales`, `sale_items` et `suppliers`.
