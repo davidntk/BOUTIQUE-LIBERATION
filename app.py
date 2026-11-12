@@ -24,64 +24,37 @@ def close_db(error=None):
         conn.close()
 
 def init_db():
+    """Crée la base SQLite locale à partir du fichier database/schema.sql."""
+    os.makedirs(os.path.dirname(os.path.abspath(DATABASE)), exist_ok=True)
+    schema_path = os.path.join(BASE_DIR, "database", "schema.sql")
     conn = sqlite3.connect(DATABASE)
     conn.execute("PRAGMA foreign_keys = ON")
-    conn.executescript("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'admin'
-    );
-    CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
-        category TEXT NOT NULL, color TEXT DEFAULT '', purchase_price REAL NOT NULL DEFAULT 0,
-        sale_price REAL NOT NULL DEFAULT 0, image_url TEXT DEFAULT '',
-        description TEXT DEFAULT '', created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS stock (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-        size TEXT NOT NULL, quantity INTEGER NOT NULL DEFAULT 0,
-        UNIQUE(product_id, size)
-    );
-    CREATE TABLE IF NOT EXISTS movements (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL REFERENCES products(id),
-        size TEXT NOT NULL, quantity INTEGER NOT NULL, kind TEXT NOT NULL,
-        reason TEXT DEFAULT '', created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS sales (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL,
-        phone TEXT DEFAULT '', total REAL NOT NULL, payment_method TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE TABLE IF NOT EXISTS sale_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sale_id INTEGER NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
-        product_id INTEGER NOT NULL REFERENCES products(id),
-        size TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price REAL NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS suppliers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
-        phone TEXT DEFAULT '', email TEXT DEFAULT '', address TEXT DEFAULT ''
-    );
-    """)
-    # Compte de démonstration : à changer avant toute mise en ligne.
-    conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES(?,?,?)",
-                 ("admin", "admin123", "admin"))
-    count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
-    if count == 0:
-        samples = [
-            ("Sneakers Urban", "Homme", "Blanc", 18, 35, "", "Chaussure urbaine"),
-            ("Basket Élégance", "Femme", "Noir", 20, 39, "", "Style quotidien"),
-            ("Sport Runner", "Sport", "Bleu", 22, 42, "", "Chaussure de sport"),
-            ("Mocassin Classic", "Cuir", "Marron", 25, 48, "", "Chaussure classique")
-        ]
-        for p in samples:
-            cur = conn.execute("INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description) VALUES(?,?,?,?,?,?,?)", p)
-            for size in ("38","39","40","41","42","43"):
-                conn.execute("INSERT INTO stock(product_id,size,quantity) VALUES(?,?,?)", (cur.lastrowid,size,2))
-    conn.commit()
-    conn.close()
+    try:
+        with open(schema_path, "r", encoding="utf-8") as schema_file:
+            conn.executescript(schema_file.read())
+
+        # Compte de démonstration et produits d'exemple au premier démarrage.
+        conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES(?,?,?)",
+                     ("admin", "admin123", "admin"))
+        count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+        if count == 0:
+            samples = [
+                ("Sneakers Urban", "Homme", "Blanc", 18, 35, "", "Chaussure urbaine"),
+                ("Basket Élégance", "Femme", "Noir", 20, 39, "", "Style quotidien"),
+                ("Sport Runner", "Sport", "Bleu", 22, 42, "", "Chaussure de sport"),
+                ("Mocassin Classic", "Cuir", "Marron", 25, 48, "", "Chaussure classique")
+            ]
+            for product in samples:
+                cur = conn.execute(
+                    "INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description) VALUES(?,?,?,?,?,?,?)",
+                    product
+                )
+                for size in ("38", "39", "40", "41", "42", "43"):
+                    conn.execute("INSERT INTO stock(product_id,size,quantity) VALUES(?,?,?)",
+                                 (cur.lastrowid, size, 2))
+        conn.commit()
+    finally:
+        conn.close()
 
 def login_required(fn):
     @wraps(fn)
