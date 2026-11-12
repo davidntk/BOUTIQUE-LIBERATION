@@ -69,8 +69,3 @@ CREATE TABLE IF NOT EXISTS suppliers (
   address VARCHAR(255) DEFAULT ''
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_products_category ON products(category);
-CREATE INDEX idx_stock_product_size ON stock(product_id, size);
-CREATE INDEX idx_movements_created_at ON movements(created_at);
-CREATE INDEX idx_sales_created_at ON sales(created_at);
-CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
