@@ -5,7 +5,8 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, abort
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.path.join(BASE_DIR, "boutique.db")
+# Base SQLite stockée localement sur cet ordinateur. DATABASE_PATH est facultatif.
+DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "boutique.db"))
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key-before-deployment")
 
