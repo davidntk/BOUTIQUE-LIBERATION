@@ -55,3 +55,30 @@ BOUTIQUE-LIBERATION/
 
 ## Limites de cette version
 Cette version est une base fonctionnelle de projet académique. L'authentification utilise encore un mot de passe de démonstration en clair : elle doit être renforcée avant une utilisation réelle. L'image produit est renseignée par URL (pas encore par téléversement de fichier). Le calcul du bénéfice, la gestion complète des utilisateurs et la gestion des fournisseurs restent à développer.
+## Base de données locale SQLite
+
+L'application est reliée à une base de données SQLite locale. Au premier lancement, `app.py` lit `database/schema.sql`, crée les tables et ajoute les données de démonstration si la base est vide.
+
+- Fichier de données : `boutique.db` à la racine du projet.
+- Schéma SQL : `database/schema.sql`.
+- Les ventes, produits, pointures et mouvements de stock sont enregistrés dans ce fichier sur votre ordinateur.
+- Le fichier `boutique.db` est ignoré par Git : les données privées ne sont pas envoyées sur GitHub.
+
+### Démarrer sur Windows
+
+Dans PowerShell, depuis le dossier du projet :
+
+```powershell
+py -m venv venv
+.\\venv\\Scripts\\Activate.ps1
+python -m pip install -r requirements.txt
+python app.py
+```
+
+Puis ouvrir `http://127.0.0.1:5001`.
+
+### Sauvegarder la base
+
+Arrêter l'application, puis copier le fichier `boutique.db` dans un dossier de sauvegarde. Ne supprimez pas ce fichier si vous souhaitez conserver vos ventes et votre stock.
+
+Pour choisir un autre emplacement, définir la variable d'environnement `DATABASE_PATH` avant de lancer `python app.py`.
