@@ -88,7 +88,7 @@
    <div class="product-image">
     {% if p.image_url %}<img loading="lazy" src="{{ p.image_url }}" alt="{{ p.name }}">
     {% elif p.category == 'Femme' %}<img loading="lazy" src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=85" alt="Chaussures pour femme">
-    {% elif p.category == 'Cuir' %}<img loading="lazy" src="https://images.unsplash.com/photo-1614252369475-531ask4a?auto=format&fit=crop&w=800&q=85" alt="Chaussures en cuir">
+    {% elif p.category == 'Cuir' %}<img loading="lazy" src="https://images.unsplash.com/photo-1548764703-22c55cbd8210?auto=format&fit=crop&fm=jpg&q=85&w=1000" alt="Chaussures en cuir">
     {% elif p.category == 'Sport' %}<img loading="lazy" src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=85" alt="Baskets de sport">
     {% else %}<img loading="lazy" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85" alt="Chaussures tendance">{% endif %}
     <span class="tag">{{ p.category }}</span>
