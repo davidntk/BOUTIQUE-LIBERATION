@@ -1,15 +1,122 @@
-{% extends "base.html" %}{% block title %}Catalogue | BOUTIQUE LIBERATION{% endblock %}
+{% extends "base.html" %}
+{% block title %}Accueil | BOUTIQUE LIBERATION{% endblock %}
 {% block content %}
 <style>
-.hero{gap:35px;align-items:center}.hero-art{width:min(42%,440px);height:300px;border:0;border-radius:14px;overflow:hidden;transform:none;background:#ffffff18;position:relative}
-.hero-art img{width:100%;height:100%;object-fit:cover;border-radius:14px}
-.hero-art small{position:absolute;bottom:14px;right:16px;background:#234b3bda;color:#fff;padding:8px 12px;border-radius:20px;font:10px 'DM Sans';letter-spacing:2px}
-.product-image img{transition:transform .35s ease}.product-card:hover .product-image img{transform:scale(1.05)}
-@media(max-width:650px){.hero-art{width:100%;height:190px}.hero{display:block}.hero-art{margin-top:25px}}
+:root{--bl-green:#234b3b;--bl-lime:#d5e5a7;--bl-paper:#f7f7f2;--bl-line:#e6e8df}
+.store-hero{max-width:1500px;margin:24px auto 0;padding:0 6%}
+.store-hero-panel{min-height:390px;background:var(--bl-green);color:white;display:grid;grid-template-columns:1.05fr .95fr;overflow:hidden;position:relative}
+.store-hero-copy{padding:65px clamp(25px,6vw,85px);align-self:center;position:relative;z-index:1}
+.store-kicker{font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;color:#a9bd91}
+.store-hero h1{font:700 clamp(42px,5.4vw,70px)/1.04 'Playfair Display',serif;margin:17px 0}
+.store-hero h1 em{color:var(--bl-lime);font-style:italic}
+.store-hero p{max-width:420px;color:#d9e2db;line-height:1.8;font-size:14px}
+.store-hero .button{margin-top:14px;background:var(--bl-lime);color:var(--bl-green);text-decoration:none}
+.store-hero-photo{min-height:390px;background:linear-gradient(90deg,var(--bl-green) 0%,transparent 35%),url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=90') center/cover}
+.store-stamp{position:absolute;right:28px;top:24px;width:88px;height:88px;border-radius:50%;background:var(--bl-lime);color:var(--bl-green);display:grid;place-content:center;text-align:center;font-size:10px;font-weight:800;line-height:1.5;transform:rotate(9deg)}
+.category-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0 34px}
+.category-card{background:#fff;border:1px solid var(--bl-line);padding:18px;text-align:center;transition:.2s}
+.category-card:hover,.category-card.active{background:#edf2e4;border-color:#a8bd91;transform:translateY(-3px)}
+.category-card span{display:block;font-size:26px;margin-bottom:8px}
+.category-card strong{font-size:11px;letter-spacing:1px}
+.catalogue-tools{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
+.catalogue-tools .search{max-width:430px;width:100%}
+.catalogue-tools .search input{min-width:0;flex:1}
+.product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.product-card{padding:0;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px #17271b15}
+.product-image{height:235px}
+.product-image img{transition:transform .4s}
+.product-card:hover .product-image img{transform:scale(1.05)}
+.product-info{padding:15px 15px 9px}
+.product-bottom{padding:10px 15px;border-top:1px solid var(--bl-line)}
+.buy-form{padding:14px 15px 16px;border-top:1px solid var(--bl-line);background:#fbfcf8}
+.buy-form h4{font:600 16px 'Playfair Display',serif;margin:0 0 10px;color:var(--bl-green)}
+.buy-form label{font-size:10px;margin:9px 0;gap:5px}
+.buy-form input,.buy-form select{padding:9px;font-size:11px}
+.buy-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.buy-form .button{margin-top:8px}
+.out-of-stock{padding:12px 15px;color:#a33;font-size:12px}
+.store-promo{margin:20px 6% 55px;padding:34px 5%;background:#202b25;color:white;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.store-promo h2{font:700 30px 'Playfair Display',serif;margin:8px 0}
+.store-promo p{font-size:12px;color:#d1d8d2}
+.store-promo .button{background:var(--bl-lime);color:var(--bl-green);white-space:nowrap}
+@media(max-width:950px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.store-hero-panel{min-height:340px}.store-hero-photo{min-height:340px}}
+@media(max-width:650px){.store-hero{padding:0 14px;margin-top:14px}.store-hero-panel{display:block;min-height:0}.store-hero-copy{padding:38px 25px 20px}.store-hero h1{font-size:43px}.store-hero-photo{min-height:210px;background-position:center}.store-stamp{width:68px;height:68px;right:18px;top:18px;font-size:8px}.section{padding:38px 15px}.category-cards{grid-template-columns:repeat(2,1fr);gap:9px}.category-card{padding:14px 8px}.category-card strong{font-size:10px}.product-grid{gap:10px}.product-image{height:165px}.product-info{padding:11px}.product-info h3{font-size:12px}.product-info strong{font-size:12px}.product-bottom{padding:9px 11px;display:block}.product-bottom details{margin-top:8px}.buy-form{padding:10px}.buy-fields{gap:7px}.store-promo{margin:35px 14px;padding:25px;display:block}.store-promo h2{font-size:25px}.store-promo .button{margin-top:10px}}
 </style>
-<section class="hero"><div><p class="eyebrow">LE STYLE À CHAQUE PAS</p><h1>Trouvez votre<br><em>prochaine paire.</em></h1><p>Découvrez notre sélection de chaussures pour toutes les occasions.</p><a class="button light" href="#catalogue">Explorer le catalogue</a></div><div class="hero-art"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=85" alt="Chaussure de sport rouge"><small>WALK YOUR WAY</small></div></section>
-<section id="catalogue" class="section"><div class="section-heading"><div><p class="eyebrow">NOTRE COLLECTION</p><h2>Le catalogue</h2></div><form class="search" method="get"><input name="q" value="{{ q }}" placeholder="Rechercher une chaussure..."><button class="button dark">Rechercher</button></form></div>
-<div class="chips"><a class="{% if not category %}active{% endif %}" href="{{ url_for('index') }}">Tous</a>{% for cat in ['Homme','Femme','Sport','Cuir'] %}<a class="{% if category==cat %}active{% endif %}" href="{{ url_for('index',category=cat,q=q) }}">{{ cat }}</a>{% endfor %}</div>
-<div class="product-grid">{% for p in products %}<article class="product-card"><div class="product-image">{% if p.image_url %}<img loading="lazy" src="{{ p.image_url }}" alt="{{ p.name }}">{% elif p.category == 'Femme' %}<img loading="lazy" src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=85" alt="Chaussures pour femme">{% elif p.category == 'Cuir' %}<img loading="lazy" src="https://images.unsplash.com/photo-1614252369475-531ask4a?auto=format&fit=crop&w=800&q=85" alt="Chaussures en cuir">{% elif p.category == 'Sport' %}<img loading="lazy" src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=85" alt="Baskets de sport">{% else %}<img loading="lazy" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85" alt="Chaussures tendance">{% endif %}<span class="tag">{{ p.category }}</span></div><div class="product-info"><div><h3>{{ p.name }}</h3><p>{{ p.color or 'Collection' }}</p></div><strong>{{ '%.2f'|format(p.sale_price) }} $</strong></div><div class="product-bottom"><span class="{% if p.total_stock<=2 %}low{% endif %}">{{ p.total_stock }} paire(s) disponible(s)</span><details><summary>Voir les pointures</summary><div class="size-list">{% for s in sizes.get(p.id,[]) %}<span>{{ s.size }} : {{ s.quantity }}</span>{% endfor %}</div></details></div>
-{% if p.total_stock > 0 %}<form class="buy-form" method="post" action="{{ url_for('buy_product', product_id=p.id) }}"><h4>Commander cette paire</h4><label>Pointure<select name="size" required>{% for s in sizes.get(p.id,[]) if s.quantity > 0 %}<option value="{{ s.size }}">{{ s.size }} ({{ s.quantity }} disponible(s))</option>{% endfor %}</select></label><div class="buy-fields"><label>Quantité<input type="number" name="quantity" min="1" max="{{ p.total_stock }}" value="1" required></label><label>Votre nom<input name="customer_name" placeholder="Nom du client"></label></div><label>Téléphone<input name="phone" type="tel" placeholder="+243..." required></label><label>Mode de paiement<select name="payment_method"><option>Paiement à la livraison</option><option>Espèces</option><option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option></select></label><button class="button dark full" type="submit">Acheter maintenant</button></form>{% else %}<p class="out-of-stock">Rupture de stock</p>{% endif %}</article>{% else %}<p>Aucun produit trouvé.</p>{% endfor %}</div></section>
+
+<section class="store-hero">
+ <div class="store-hero-panel">
+  <div class="store-hero-copy">
+   <div class="store-kicker">Boutique Libération · Lubumbashi</div>
+   <h1>Affirmez votre<br><em>style à chaque pas.</em></h1>
+   <p>Découvrez notre sélection de chaussures pour elle et lui. Des modèles élégants, sportifs et classiques pour toutes les occasions.</p>
+   <a class="button light" href="#catalogue">Découvrir la collection ↗</a>
+  </div>
+  <div class="store-hero-photo" role="img" aria-label="Chaussures de la collection Boutique Libération"></div>
+  <div class="store-stamp">STYLE<br> & QUALITÉ<br>✦ 2026</div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-heading"><div><p class="eyebrow">Trouvez votre univers</p><h2>Explorer les catégories</h2><p>Une paire adaptée à chaque occasion.</p></div></div>
+ <div class="category-cards">
+  <a class="category-card {% if category=='Homme' %}active{% endif %}" href="{{ url_for('index',category='Homme') }}"><span>👞</span><strong>HOMME</strong></a>
+  <a class="category-card {% if category=='Femme' %}active{% endif %}" href="{{ url_for('index',category='Femme') }}"><span>👠</span><strong>FEMME</strong></a>
+  <a class="category-card {% if category=='Sport' %}active{% endif %}" href="{{ url_for('index',category='Sport') }}"><span>👟</span><strong>SPORT & SNEAKERS</strong></a>
+  <a class="category-card {% if category=='Cuir' %}active{% endif %}" href="{{ url_for('index',category='Cuir') }}"><span>🥾</span><strong>CHAUSSURES EN CUIR</strong></a>
+ </div>
+</section>
+
+<section id="catalogue" class="section">
+ <div class="catalogue-tools">
+  <div class="section-heading"><div><p class="eyebrow">Sélection boutique</p><h2>Nos chaussures</h2><p>Choisissez votre modèle et passez commande directement.</p></div></div>
+  <form class="search" method="get" action="{{ url_for('index') }}">
+   {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+   <input name="q" value="{{ q }}" placeholder="Rechercher une chaussure...">
+   <button class="button dark" type="submit">Rechercher</button>
+  </form>
+ </div>
+ <div class="chips">
+  <a class="{% if not category %}active{% endif %}" href="{{ url_for('index',q=q) }}">Tout voir</a>
+  {% for cat in ['Homme','Femme','Sport','Cuir'] %}
+   <a class="{% if category==cat %}active{% endif %}" href="{{ url_for('index',category=cat,q=q) }}">{{ cat }}</a>
+  {% endfor %}
+ </div>
+ <div class="product-grid">
+  {% for p in products %}
+  <article class="product-card">
+   <div class="product-image">
+    {% if p.image_url %}<img loading="lazy" src="{{ p.image_url }}" alt="{{ p.name }}">
+    {% elif p.category == 'Femme' %}<img loading="lazy" src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=85" alt="Chaussures pour femme">
+    {% elif p.category == 'Cuir' %}<img loading="lazy" src="https://images.unsplash.com/photo-1614252369475-531ask4a?auto=format&fit=crop&w=800&q=85" alt="Chaussures en cuir">
+    {% elif p.category == 'Sport' %}<img loading="lazy" src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=85" alt="Baskets de sport">
+    {% else %}<img loading="lazy" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85" alt="Chaussures tendance">{% endif %}
+    <span class="tag">{{ p.category }}</span>
+   </div>
+   <div class="product-info"><div><h3>{{ p.name }}</h3><p>{{ p.color or 'Collection Libération' }}</p></div><strong>{{ '%.2f'|format(p.sale_price) }} $</strong></div>
+   <div class="product-bottom"><span class="{% if p.total_stock<=2 %}low{% endif %}">{{ p.total_stock }} paire(s) disponible(s)</span>
+    <details><summary>Voir les pointures</summary><div class="size-list">{% for s in sizes.get(p.id,[]) %}<span>{{ s.size }} : {{ s.quantity }}</span>{% endfor %}</div></details>
+   </div>
+   {% if p.total_stock > 0 %}
+   <form class="buy-form" method="post" action="{{ url_for('buy_product', product_id=p.id) }}">
+    <h4>Commander cette paire</h4>
+    <label>Pointure<select name="size" required>{% for s in sizes.get(p.id,[]) if s.quantity > 0 %}<option value="{{ s.size }}">{{ s.size }} ({{ s.quantity }} disponible(s))</option>{% endfor %}</select></label>
+    <div class="buy-fields">
+     <label>Quantité<input type="number" name="quantity" min="1" max="{{ p.total_stock }}" value="1" required></label>
+     <label>Votre nom<input name="customer_name" placeholder="Nom du client"></label>
+    </div>
+    <label>Téléphone<input name="phone" type="tel" placeholder="+243..." required></label>
+    <label>Mode de paiement<select name="payment_method"><option>Paiement à la livraison</option><option>Espèces</option><option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option></select></label>
+    <button class="button dark full" type="submit">Commander maintenant</button>
+   </form>
+   {% else %}<p class="out-of-stock">Rupture de stock</p>{% endif %}
+  </article>
+  {% else %}<p>Aucun produit trouvé. Essayez une autre recherche.</p>{% endfor %}
+ </div>
+</section>
+
+<section class="store-promo">
+ <div><p class="store-kicker">Boutique Libération · Lubumbashi</p><h2>Le confort et l'élégance à vos pieds.</h2><p>Votre prochaine paire vous attend dans notre collection.</p></div>
+ <a class="button" href="#catalogue">Voir le catalogue ↑</a>
+</section>
 {% endblock %}
