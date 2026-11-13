@@ -159,15 +159,8 @@ def buy_product(product_id):
 
 @app.route("/login", methods=["GET","POST"])
 def login():
-    if request.method == "POST":
-        user = db().execute("SELECT * FROM users WHERE username=? AND password=?",
-                            (request.form.get("username",""), request.form.get("password",""))).fetchone()
-        if user:
-            session["user_id"] = user["id"]
-            session["username"] = user["username"]
-            return redirect(request.args.get("next") or url_for("dashboard"))
-        flash("Identifiants incorrects.", "error")
-    return render_template("login.html")
+    """Ancienne adresse de connexion : redirige désormais vers l'administration."""
+    return redirect(url_for("dashboard"))
 
 @app.route("/logout")
 def logout():
