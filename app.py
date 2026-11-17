@@ -173,8 +173,13 @@ def buy_product(product_id):
             "SELECT quantity FROM stock WHERE product_id=? AND size=?",
             (product_id, size)
         ).fetchone()
-        if not product or not stock_row or stock_row["quantity"] < qty:
-            raise ValueError("Cette pointure n'est pas disponible en quantité suffisante.")
+        if not product or not stock_row:
+            raise ValueError("Ce produit ou cette taille n'existe pas.")
+        # Si le stock est à zéro, enregistrer une commande sur demande sans
+        # décrémenter l'inventaire. Si un stock positif existe, le respecter.
+        order_on_request = stock_row["quantity"] == 0
+        if stock_row["quantity"] > 0 and stock_row["quantity"] < qty:
+            raise ValueError("Quantité supérieure au stock disponible.")
         total = product["sale_price"] * qty
         cur = conn.execute(
             "INSERT INTO sales(customer_name,phone,total,payment_method) VALUES(?,?,?,?)",
@@ -184,16 +189,20 @@ def buy_product(product_id):
             "INSERT INTO sale_items(sale_id,product_id,size,quantity,unit_price) VALUES(?,?,?,?,?)",
             (cur.lastrowid, product_id, size, qty, product["sale_price"])
         )
-        conn.execute(
-            "UPDATE stock SET quantity=quantity-? WHERE product_id=? AND size=?",
-            (qty, product_id, size)
-        )
-        conn.execute(
-            "INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
-            (product_id, size, qty, "SORTIE", "Commande client en ligne #" + str(cur.lastrowid))
-        )
+        if not order_on_request:
+            conn.execute(
+                "UPDATE stock SET quantity=quantity-? WHERE product_id=? AND size=?",
+                (qty, product_id, size)
+            )
+            conn.execute(
+                "INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
+                (product_id, size, qty, "SORTIE", "Commande client en ligne #" + str(cur.lastrowid))
+            )
         conn.commit()
-        flash("Commande enregistrée avec succès ! Votre numéro de commande est #" + str(cur.lastrowid), "success")
+        if order_on_request:
+            flash("Demande de commande enregistrée ! Cette taille est à confirmer avec la boutique. Référence #" + str(cur.lastrowid), "success")
+        else:
+            flash("Commande enregistrée avec succès ! Votre numéro de commande est #" + str(cur.lastrowid), "success")
     except (ValueError, KeyError, mysql.connector.Error) as exc:
         conn.rollback()
         flash(str(exc) or "Impossible d'enregistrer la commande.", "error")
