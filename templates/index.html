@@ -13,7 +13,7 @@
 .store-hero .button{margin-top:14px;background:var(--bl-lime);color:var(--bl-green);text-decoration:none}
 .store-hero-photo{min-height:390px;background:linear-gradient(90deg,var(--bl-green) 0%,transparent 35%),url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=90') center/cover}
 .store-stamp{position:absolute;right:28px;top:24px;width:88px;height:88px;border-radius:50%;background:var(--bl-lime);color:var(--bl-green);display:grid;place-content:center;text-align:center;font-size:10px;font-weight:800;line-height:1.5;transform:rotate(9deg)}
-.category-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0 34px}
+.category-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:24px 0 34px}
 .category-card{background:#fff;border:1px solid var(--bl-line);padding:18px;text-align:center;transition:.2s}
 .category-card:hover,.category-card.active{background:#edf2e4;border-color:#a8bd91;transform:translateY(-3px)}
 .category-card span{display:block;font-size:26px;margin-bottom:8px}
@@ -41,7 +41,7 @@
 .store-promo p{font-size:12px;color:#d1d8d2}
 .store-promo .button{background:var(--bl-lime);color:var(--bl-green);white-space:nowrap}
 @media(max-width:950px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.store-hero-panel{min-height:340px}.store-hero-photo{min-height:340px}}
-@media(max-width:650px){.store-hero{padding:0 14px;margin-top:14px}.store-hero-panel{display:block;min-height:0}.store-hero-copy{padding:38px 25px 20px}.store-hero h1{font-size:43px}.store-hero-photo{min-height:210px;background-position:center}.store-stamp{width:68px;height:68px;right:18px;top:18px;font-size:8px}.section{padding:38px 15px}.category-cards{grid-template-columns:repeat(2,1fr);gap:9px}.category-card{padding:14px 8px}.category-card strong{font-size:10px}.product-grid{gap:10px}.product-image{height:165px}.product-info{padding:11px}.product-info h3{font-size:12px}.product-info strong{font-size:12px}.product-bottom{padding:9px 11px;display:block}.product-bottom details{margin-top:8px}.buy-form{padding:10px}.buy-fields{gap:7px}.store-promo{margin:35px 14px;padding:25px;display:block}.store-promo h2{font-size:25px}.store-promo .button{margin-top:10px}}
+@media(max-width:650px){.store-hero{padding:0 14px;margin-top:14px}.store-hero-panel{display:block;min-height:0}.store-hero-copy{padding:38px 25px 20px}.store-hero h1{font-size:43px}.store-hero-photo{min-height:210px;background-position:center}.store-stamp{width:68px;height:68px;right:18px;top:18px;font-size:8px}.section{padding:38px 15px}.category-cards{grid-template-columns:repeat(3,1fr);gap:9px}.category-card{padding:14px 8px}.category-card strong{font-size:10px}.product-grid{gap:10px}.product-image{height:165px}.product-info{padding:11px}.product-info h3{font-size:12px}.product-info strong{font-size:12px}.product-bottom{padding:9px 11px;display:block}.product-bottom details{margin-top:8px}.buy-form{padding:10px}.buy-fields{gap:7px}.store-promo{margin:35px 14px;padding:25px;display:block}.store-promo h2{font-size:25px}.store-promo .button{margin-top:10px}}
 
 .style-selection{max-width:1320px;margin:0 auto;padding:10px 6% 48px}
 .style-selection-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:18px}
@@ -190,10 +190,11 @@ body{background:var(--bl-paper);color:var(--bl-green)}
 <section class="section">
  <div class="section-heading"><div><p class="eyebrow">Trouvez votre univers</p><h2>Explorer les catégories</h2><p>Une paire adaptée à chaque occasion.</p></div></div>
  <div class="category-cards">
-  <a class="category-card {% if category=='Homme' %}active{% endif %}" href="{{ url_for('index',category='Homme') }}"><span>👞</span><strong>HOMME</strong></a>
-  <a class="category-card {% if category=='Femme' %}active{% endif %}" href="{{ url_for('index',category='Femme') }}"><span>👠</span><strong>FEMME</strong></a>
-  <a class="category-card {% if category=='Sport' %}active{% endif %}" href="{{ url_for('index',category='Sport') }}"><span>👟</span><strong>SPORT & SNEAKERS</strong></a>
-  <a class="category-card {% if category=='Cuir' %}active{% endif %}" href="{{ url_for('index',category='Cuir') }}"><span>🥾</span><strong>CHAUSSURES EN CUIR</strong></a>
+  <a class="category-card {% if category=='Homme' %}active{% endif %}" href="{{ url_for('index',category='Homme') }}"><span>👔</span><strong>HOMMES</strong></a>
+  <a class="category-card {% if category=='Femme' %}active{% endif %}" href="{{ url_for('index',category='Femme') }}"><span>👗</span><strong>FEMMES</strong></a>
+  <a class="category-card {% if category=='Chaussures' %}active{% endif %}" href="{{ url_for('index',category='Chaussures') }}"><span>👟</span><strong>CHAUSSURES</strong></a>
+  <a class="category-card {% if category=='Sport' %}active{% endif %}" href="{{ url_for('index',category='Sport') }}"><span>🏃</span><strong>SPORT & SNEAKERS</strong></a>
+  <a class="category-card {% if category=='Cuir' %}active{% endif %}" href="{{ url_for('index',category='Cuir') }}"><span>👜</span><strong>CUIRS</strong></a>
  </div>
 </section>
 
@@ -250,7 +251,7 @@ body{background:var(--bl-paper);color:var(--bl-green)}
  </div>
  <div class="chips">
   <a class="{% if not category %}active{% endif %}" href="{{ url_for('index',q=q) }}">Tout voir</a>
-  {% for cat in ['Homme','Femme','Sport','Cuir'] %}
+  {% for cat in ['Homme','Femme','Chaussures','Sport','Cuir'] %}
    <a class="{% if category==cat %}active{% endif %}" href="{{ url_for('index',category=cat,q=q) }}">{{ cat }}</a>
   {% endfor %}
  </div>
@@ -272,7 +273,7 @@ body{background:var(--bl-paper);color:var(--bl-green)}
    {% if p.total_stock > 0 %}
    <form class="buy-form" method="post" action="{{ url_for('buy_product', product_id=p.id) }}">
     <h4>Commander cette paire</h4>
-    <label>Pointure<select name="size" required>{% for s in sizes.get(p.id,[]) if s.quantity > 0 %}<option value="{{ s.size }}">{{ s.size }} ({{ s.quantity }} disponible(s))</option>{% endfor %}</select></label>
+    <label>Taille / pointure<select name="size" required>{% for s in sizes.get(p.id,[]) if s.quantity > 0 %}<option value="{{ s.size }}">{{ s.size }} ({{ s.quantity }} disponible(s))</option>{% endfor %}</select></label>
     <div class="buy-fields">
      <label>Quantité<input type="number" name="quantity" min="1" max="{{ p.total_stock }}" value="1" required></label>
      <label>Votre nom<input name="customer_name" placeholder="Nom du client"></label>
