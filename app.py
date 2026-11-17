@@ -135,6 +135,13 @@ def init_db():
         conn.execute("""UPDATE products SET image_url=? WHERE name=? AND (image_url IS NULL OR image_url='')""",
                      ('https://acdn-us.mitiendanube.com/stores/001/668/651/products/202206-copy-2-0455f59495a5a18afd17209011273156-1024-1024.webp', 'Mocassin Classic'))
 
+        # Attribue deux photos distinctes aux deux modèles de chaussures.
+        # Mise à jour systématique pour corriger aussi les anciennes photos déjà enregistrées.
+        conn.execute("UPDATE products SET image_url=? WHERE name=?",
+                     ('https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=900&q=85', 'Sport Runner'))
+        conn.execute("UPDATE products SET image_url=? WHERE name=?",
+                     ('https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=900&q=85', 'Sneakers Urban'))
+
         conn.commit()
     except mysql.connector.Error:
         conn.rollback()
