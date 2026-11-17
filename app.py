@@ -138,9 +138,9 @@ def init_db():
         # Attribue deux photos distinctes aux deux modèles de chaussures.
         # Mise à jour systématique pour corriger aussi les anciennes photos déjà enregistrées.
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
-                     ('https://images.squarespace-cdn.com/content/v1/5b8c557c8f51308965aa6dd8/1626272853910-352ZLN7AKORK91LLKD1B/ESGRAINEDWHITE.jpg', 'Sport Runner'))
+                     ('https://www.careofcarl.ch/bilder/artiklar/600x600_grey_4_5/26390311r.jpg', 'Sport Runner'))
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
-                     ('https://uniformstandard.com/cdn/shop/files/Relaxed_Sneaker_Triple_Navy_Leather_2.jpg?v=1765319075&width=2000', 'Sneakers Urban'))
+                     ('https://i5.walmartimages.com/asr/39032026-bf8a-4416-a005-3281ef5c802c_1.39642dd4c931c4dffe84fba39a86af3a.jpeg?odnBg=FFFFFF&odnHeight=768&odnWidth=768', 'Sneakers Urban'))
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
                      ('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85', 'Basket Élégance'))
 
@@ -207,8 +207,8 @@ def index():
         "Veste en cuir urbaine": "Cuir"
     }
     product_images = {
-        "Sport Runner": "https://images.squarespace-cdn.com/content/v1/5b8c557c8f51308965aa6dd8/1626272853910-352ZLN7AKORK91LLKD1B/ESGRAINEDWHITE.jpg",
-        "Sneakers Urban": "https://uniformstandard.com/cdn/shop/files/Relaxed_Sneaker_Triple_Navy_Leather_2.jpg?v=1765319075&width=2000",
+        "Sport Runner": "https://www.careofcarl.ch/bilder/artiklar/600x600_grey_4_5/26390311r.jpg",
+        "Sneakers Urban": "https://i5.walmartimages.com/asr/39032026-bf8a-4416-a005-3281ef5c802c_1.39642dd4c931c4dffe84fba39a86af3a.jpeg?odnBg=FFFFFF&odnHeight=768&odnWidth=768",
         "Basket Élégance": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85"
     }
     for product in products:
