@@ -1,74 +1,109 @@
 # BOUTIQUE LIBERATION
 
-Application de gestion d'une boutique de chaussures développée avec **Python, Flask, MySQL, HTML, CSS et JavaScript**.
+Application de boutique développée avec Python, Flask, MySQL, HTML, CSS et JavaScript.
 
-## Fonctionnalités
-- Catalogue public et recherche de chaussures.
-- Espace administrateur.
-- Gestion des produits et des prix.
-- Gestion du stock par pointure.
-- Historique des entrées et sorties.
-- Ventes, commandes et mise à jour automatique du stock.
-- Factures imprimables et tableau de bord.
+## 1. Préparer Windows et VS Code
 
-## Installation locale avec XAMPP et MySQL
+Installer :
+- Python 3.11 ou 3.12 (cocher « Add Python to PATH » pendant l'installation).
+- Visual Studio Code.
+- XAMPP pour MySQL.
 
-### 1. Démarrer MySQL
-1. Installer XAMPP.
-2. Ouvrir le panneau de contrôle XAMPP.
-3. Démarrer **MySQL** (Apache est facultatif pour Flask).
-4. Ouvrir phpMyAdmin depuis le bouton Admin de MySQL.
+Ouvrir le dossier du projet dans VS Code, puis ouvrir un terminal PowerShell.
 
-### 2. Créer les tables
-1. Dans phpMyAdmin, ouvrir l'onglet **Importer**.
-2. Sélectionner le fichier `database/schema_mysql.sql` du projet.
-3. Cliquer sur **Importer / Exécuter**.
-4. Une base nommée `boutique_liberation` et toutes les tables seront créées.
+## 2. Créer l'environnement Python
 
-### 3. Installer et démarrer Flask
-Dans PowerShell, depuis le dossier du projet :
+Depuis le dossier principal du projet :
 
 ```powershell
-py -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+py -3.12 -m venv .venv
+`.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Si PowerShell bloque l'activation, utiliser cette commande dans le terminal courant, puis réessayer :
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+`.venv\Scripts\Activate.ps1
+```
+
+Si Python 3.12 n'est pas installé, remplacer `py -3.12` par `py`.
+
+## 3. Préparer MySQL avec XAMPP
+
+1. Ouvrir XAMPP et démarrer **MySQL**.
+2. Cliquer sur **Admin** à côté de MySQL pour ouvrir phpMyAdmin.
+3. Ouvrir l'onglet **Importer**.
+4. Sélectionner `database/schema_mysql.sql`.
+5. Lancer l'importation. La base `boutique_liberation` et ses tables seront créées.
+
+Apache n'est pas nécessaire pour exécuter Flask ; il peut seulement être utilisé pour accéder à phpMyAdmin selon votre installation XAMPP.
+
+## 4. Configurer les variables locales
+
+Copier `.env.example` et nommer la copie `.env` à la racine du projet. Adapter les paramètres MySQL si nécessaire.
+
+Valeurs habituelles de XAMPP :
+- MYSQL_HOST=127.0.0.1
+- MYSQL_PORT=3306
+- MYSQL_USER=root
+- MYSQL_PASSWORD= (vide par défaut sur une installation XAMPP standard)
+- MYSQL_DATABASE=boutique_liberation
+
+Définir aussi une longue valeur secrète personnelle pour `SECRET_KEY`. Ne jamais publier le fichier `.env` ni ses secrets sur GitHub. Le fichier est ignoré par Git.
+
+## 5. Lancer le site en local
+
+Avec l'environnement virtuel activé :
+
+```powershell
 python app.py
 ```
 
-Ouvrir ensuite **http://127.0.0.1:5001**.
+Ouvrir : http://127.0.0.1:5001
 
-Au premier démarrage, l'application crée automatiquement un compte de démonstration et quatre produits d'exemple si la table des produits est vide.
+Au premier lancement local, le code initialise les tables de données et ajoute les produits de démonstration si le catalogue est vide. Les deux modèles concernés sont configurés ainsi :
+- **Sport Runner** : paire blanche.
+- **Sneakers Urban** : paire bleu marine, modèle différent.
 
-## Paramètres MySQL
+Les images sont référencées dans `app.py` par nom de produit, aussi bien pour l'initialisation locale que pour l'affichage du catalogue.
 
-Par défaut, l'application utilise les paramètres XAMPP habituels :
-- Hôte : `127.0.0.1`
-- Port : `3306`
-- Utilisateur : `root`
-- Mot de passe : vide
-- Base : `boutique_liberation`
+## 6. Déploiement sur Render
 
-Si votre installation utilise d'autres paramètres, définissez les variables d'environnement avant de lancer Flask :
+Dans les paramètres du service Render :
 
-```powershell
-$env:MYSQL_HOST="127.0.0.1"
-$env:MYSQL_PORT="3306"
-$env:MYSQL_USER="root"
-$env:MYSQL_PASSWORD="votre_mot_de_passe"
-$env:MYSQL_DATABASE="boutique_liberation"
-python app.py
+**Build Command**
+```bash
+pip install -r requirements.txt
 ```
 
-Ne publiez jamais votre mot de passe MySQL sur GitHub.
+**Start Command**
+```bash
+gunicorn app:app
+```
 
-## Connexion administrateur de démonstration
-- Identifiant : `admin`
-- Mot de passe : `admin123`
+Ajouter dans **Environment** les variables suivantes avec les valeurs de votre hébergeur MySQL :
+- `MYSQL_HOST`
+- `MYSQL_PORT`
+- `MYSQL_USER`
+- `MYSQL_PASSWORD`
+- `MYSQL_DATABASE`
+- `SECRET_KEY` (valeur longue, aléatoire et privée)
 
-Changez ce mot de passe avant une utilisation réelle. Cette version utilise encore une authentification de démonstration simple.
+Ne mettez pas les identifiants de la base de production dans le dépôt GitHub. La base MySQL de Render doit être créée et accessible depuis le service web.
 
-## Sauvegarde
-Dans phpMyAdmin, sélectionnez la base `boutique_liberation`, ouvrez **Exporter**, puis exportez-la en SQL. Les données MySQL restent sur votre ordinateur et ne sont pas enregistrées dans le dépôt GitHub.
+**Important :** l'initialisation `init_db()` est lancée par `python app.py` en local, mais pas par la commande Gunicorn. Pour cette raison, les images des deux modèles sont également appliquées au moment de l'affichage du catalogue. Le schéma SQL doit être importé dans la base de production et les produits doivent déjà exister.
 
-## Structure de la base
-Le script `database/schema_mysql.sql` crée les tables `users`, `products`, `stock`, `movements`, `sales`, `sale_items` et `suppliers`.
+## 7. Dépannage rapide
+
+- `ModuleNotFoundError` : vérifier que `.venv` est activé puis exécuter `pip install -r requirements.txt`.
+- Erreur de connexion MySQL : vérifier que MySQL est démarré et contrôler les variables dans `.env`.
+- Port MySQL différent : modifier `MYSQL_PORT`.
+- Images non actualisées dans le navigateur : faire **Ctrl + F5** après le redéploiement.
+- Les données locales et celles de Render sont deux bases différentes : une modification sur l'une ne modifie pas automatiquement l'autre.
+
+## Sécurité
+
+L'accès administrateur de cette version est actuellement sans authentification par mot de passe. Ne pas utiliser cette configuration pour une boutique publique avec des données réelles avant d'avoir rétabli une authentification sécurisée.
