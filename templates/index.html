@@ -212,22 +212,21 @@ body{background:var(--bl-paper);color:var(--bl-green)}
     <span class="tag">{{ p.category }}</span>
    </div>
    <div class="product-info"><div><h3>{{ p.name }}</h3><p>{{ p.color or 'Collection Libération' }}</p></div><strong>{{ '%.2f'|format(p.sale_price) }} $</strong></div>
-   <div class="product-bottom"><span class="{% if p.total_stock<=2 %}low{% endif %}">{{ p.total_stock }} paire(s) disponible(s)</span>
+   <div class="product-bottom"><span class="{% if p.total_stock<=2 %}low{% endif %}">{% if p.total_stock > 0 %}{{ p.total_stock }} paire(s) disponible(s){% else %}Disponible sur commande{% endif %}</span>
     <details><summary>Voir les pointures</summary><div class="size-list">{% for s in sizes.get(p.id,[]) %}<span>{{ s.size }} : {{ s.quantity }}</span>{% endfor %}</div></details>
    </div>
-   {% if p.total_stock > 0 %}
    <form class="buy-form" method="post" action="{{ url_for('buy_product', product_id=p.id) }}">
-    <h4>Commander cette paire</h4>
-    <label>Taille / pointure<select name="size" required>{% for s in sizes.get(p.id,[]) if s.quantity > 0 %}<option value="{{ s.size }}">{{ s.size }} ({{ s.quantity }} disponible(s))</option>{% endfor %}</select></label>
+    <h4>{% if p.total_stock > 0 %}Commander cet article{% else %}Commander sur demande{% endif %}</h4>
+    {% if p.total_stock == 0 %}<p class="out-of-stock">Stock momentanément épuisé : envoyez votre demande, la boutique confirmera la disponibilité.</p>{% endif %}
+    <label>Taille / pointure<select name="size" required>{% for s in sizes.get(p.id,[]) %}<option value="{{ s.size }}">{{ s.size }}{% if s.quantity > 0 %} ({{ s.quantity }} disponible(s)){% else %} (sur demande){% endif %}</option>{% endfor %}</select></label>
     <div class="buy-fields">
-     <label>Quantité<input type="number" name="quantity" min="1" max="{{ p.total_stock }}" value="1" required></label>
+     <label>Quantité<input type="number" name="quantity" min="1" max="{% if p.total_stock > 0 %}{{ p.total_stock }}{% else %}1{% endif %}" value="1" required></label>
      <label>Votre nom<input name="customer_name" placeholder="Nom du client"></label>
     </div>
     <label>Téléphone<input name="phone" type="tel" placeholder="+243..." required></label>
     <label>Mode de paiement<select name="payment_method"><option>Paiement à la livraison</option><option>Espèces</option><option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option></select></label>
     <button class="button dark full" type="submit">Commander maintenant</button>
    </form>
-   {% else %}<p class="out-of-stock">Rupture de stock</p>{% endif %}
   </article>
   {% else %}<p>Aucun produit trouvé. Essayez une autre recherche.</p>{% endfor %}
  </div>
