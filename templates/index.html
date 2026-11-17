@@ -58,6 +58,46 @@
 .style-selection-link{font-size:11px;color:var(--bl-green);font-weight:700;text-decoration:none;white-space:nowrap}
 @media(max-width:900px){.style-selection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.style-selection{padding:8px 15px 30px}.style-selection-head{display:block}.style-selection-link{display:inline-block;margin-top:10px}.style-tile,.style-tile img{min-height:185px;height:185px}.style-tile-label strong{font-size:17px}.style-selection-grid{gap:10px}}
+
+/* Bandeaux animés et mise en scène des collections */
+:root{--bl-green:#172f46;--bl-lime:#c8a96b;--bl-paper:#f6f4ef;--bl-line:#e5e0d6}
+.store-hero-panel{background:#172f46;box-shadow:0 22px 55px #172f4618}
+.store-hero-photo{background-image:linear-gradient(90deg,#172f46 0%,#172f4655 34%,transparent 75%),url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=90')}
+.store-kicker{color:#d6bd8b}
+.store-hero h1 em{color:#d8bd85}
+.store-hero .button,.store-promo .button{background:#c8a96b;color:#172f46}
+.store-stamp{background:#c8a96b;color:#172f46}
+.category-card{border-radius:3px;box-shadow:0 5px 18px #172f4608}
+.category-card:hover,.category-card.active{background:#f0eadf;border-color:#c8a96b}
+.style-tile{border-radius:3px;box-shadow:0 8px 24px #172f4612}
+.style-tile:after{background:linear-gradient(transparent,#101e2bd9)}
+.store-promo{background:linear-gradient(115deg,#172f46,#29465d);border-left:4px solid #c8a96b}
+.store-promo .store-kicker{color:#d8bd85}
+.store-promo h2{color:#fff}
+.store-promo p{color:#d9e0e5}
+.catalogue-tools .search input{border-color:#ddd6c9}
+.catalogue-tools .search button{background:#172f46}
+.motion-strip{overflow:hidden;background:#c8a96b;color:#172f46;margin:0 auto;max-width:1500px}
+.motion-strip-track{display:flex;width:max-content;animation:bl-marquee 32s linear infinite}
+.motion-strip-track span{padding:13px 22px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.motion-strip-track b{padding:0 9px;font-size:14px}
+@keyframes bl-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.editorial-banners{max-width:1320px;margin:0 auto;padding:5px 6% 38px;display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:14px}
+.editorial-banner{min-height:155px;padding:24px;display:flex;flex-direction:column;justify-content:end;color:#fff;position:relative;overflow:hidden;background-size:cover;background-position:center;text-decoration:none}
+.editorial-banner:before{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#101e2be8,transparent 90%);transition:background .25s}
+.editorial-banner:hover:before{background:linear-gradient(0deg,#101e2bf5,#101e2b22)}
+.editorial-banner>*{position:relative}
+.editorial-banner small{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#e1c995}
+.editorial-banner strong{font:600 22px 'Playfair Display',serif;margin-top:5px}
+.editorial-banner:first-child{min-height:190px}
+.editorial-banner:nth-child(2){background-image:url('https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=900&q=85')}
+.editorial-banner:nth-child(3){background-image:url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85')}
+.editorial-banner:first-child{background-image:url('https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1000&q=85')}
+.reveal{animation:bl-rise .65s both}
+@keyframes bl-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:850px){.editorial-banners{grid-template-columns:1fr 1fr}.editorial-banner:first-child{grid-column:1/-1}}
+@media(max-width:520px){.editorial-banners{padding:0 15px 28px;gap:9px}.editorial-banner{min-height:145px;padding:15px}.editorial-banner:first-child{min-height:155px}.editorial-banner strong{font-size:18px}.motion-strip-track span{padding:11px 15px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.motion-strip-track{animation:none}.reveal{animation:none}}
 </style>
 
 <section class="store-hero">
@@ -71,6 +111,18 @@
   <div class="store-hero-photo" role="img" aria-label="Chaussures de la collection Boutique Libération"></div>
   <div class="store-stamp">STYLE<br> & QUALITÉ<br>✦ 2026</div>
  </div>
+
+</section>
+<div class="motion-strip" aria-label="Les collections Boutique Libération">
+ <div class="motion-strip-track" aria-hidden="true">
+  <span>Élégance au quotidien <b>✦</b> Collection homme <b>✦</b> Collection femme <b>✦</b> Sneakers & sport <b>✦</b> Cuir véritable <b>✦</b> Style & confort <b>✦</b></span>
+  <span>Élégance au quotidien <b>✦</b> Collection homme <b>✦</b> Collection femme <b>✦</b> Sneakers & sport <b>✦</b> Cuir véritable <b>✦</b> Style & confort <b>✦</b></span>
+ </div>
+</div>
+<section class="editorial-banners" aria-label="Accès rapide aux collections">
+ <a class="editorial-banner" href="{{ url_for('index',category='Sport') }}"><small>Actif & moderne</small><strong>Sneakers et sport ↗</strong></a>
+ <a class="editorial-banner" href="{{ url_for('index',category='Cuir') }}"><small>Élégance masculine</small><strong>Cuir & classiques ↗</strong></a>
+ <a class="editorial-banner" href="{{ url_for('index',category='Femme') }}"><small>Chic au féminin</small><strong>Collection femme ↗</strong></a>
 </section>
 
 <section class="section">
