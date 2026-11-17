@@ -119,6 +119,7 @@ def init_db():
         # et les modèles masculins dans Homme.
         genre_corrections = {
             "Tissu imprimé premium": "Femme",
+            "Polo femme": "Homme",
             "Chaussures urbaines": "Homme",
             "Veste en cuir urbaine": "Homme",
             "Escarpins élégants": "Femme",
