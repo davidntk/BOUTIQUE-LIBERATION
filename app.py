@@ -72,6 +72,48 @@ def init_db():
                 cur = conn.execute('INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description) VALUES(?,?,?,?,?,?,?)', product)
                 for size in ('38', '39', '40', '41', '42', '43'):
                     conn.execute('INSERT INTO stock(product_id,size,quantity) VALUES(?,?,?)', (cur.lastrowid, size, 2))
+
+        # Catalogue mode/vêtements repris du fichier index.html de référence.
+        # Insertion idempotente : ne remplace jamais les produits déjà gérés.
+        catalogue = [
+            ("Polo classique premium", "Homme", "Selon modèle", 22, "https://thelondongentlemen.com/cdn/shop/files/ChatGPT_Image_Apr_16_2026_03_41_51_PM_92ee7286-b074-427f-b8d6-07907414a71b.png?v=1776336381&width=1024", "Polo premium pour homme"),
+            ("Chemise élégance", "Homme", "Selon modèle", 29, "https://www.principedifirenze.com/cdn/shop/collections/image-copertina-collezioni-camicie_1200x1200.jpg?v=1693488806", "Chemise élégante pour homme"),
+            ("Polo signature", "Homme", "Selon modèle", 25, "https://www.charlestyrwhitt.com/dw/image/v2/AAWJ_PRD/on/demandware.static/-/Sites-ctshirts-master/default/dw1dbce53f/hi-res/JEP0398OLV_FOLD_SINGLE.jpg?sh=1200&sw=960", "Polo signature"),
+            ("Pantalon coupe droite", "Homme", "Selon modèle", 34, "https://themodernobserver.com/_next/image?q=75&url=https%3A%2F%2Fthe-modern-observer-v2.s3.us-east-1.amazonaws.com%2Fstyle%2Fsmart-casual-outfit-for-men.jpg%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&w=3840", "Pantalon coupe droite"),
+            ("Jean denim essentiel", "Homme", "Denim", 38, "https://www.andsons.us/cdn/shop/files/Jeans_Brandon_Indigo_Wash_FLATLAY_1.png?v=1770119486&width=640", "Jean denim"),
+            ("Tissu imprimé premium", "Homme", "Imprimé", 18, "https://shopbesida.com/cdn/shop/products/KeeyaWrapSkirt6.jpg?v=1669471624", "Tissu imprimé premium"),
+            ("Chaussures urbaines", "Chaussures", "Selon modèle", 49, "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85", "Chaussures urbaines pour homme"),
+            ("Veste en cuir urbaine", "Cuir", "Noir", 89, "https://img.guess.com/image/upload/f_auto%2Cq_auto%2Cfl_strip_profile%2Cw_800%2Cc_scale/v1/NA/Style/ECOMM/M2YL12L0QN0-JBLK-ALT1", "Veste en cuir"),
+            ("Robe chic", "Femme", "Selon modèle", 42, "https://www.shopzuri.com/cdn/shop/files/ZuriMay2023-8648.jpg?v=1694727984&width=1200", "Robe chic pour femme"),
+            ("Pagne élégant", "Femme", "Imprimé", 24, "https://i.ebayimg.com/images/g/F3YAAeSwRqFomCTv/s-l1200.jpg", "Pagne élégant"),
+            ("Jupe moderne", "Femme", "Selon modèle", 27, "https://i.pinimg.com/originals/2b/cb/13/2bcb137423b0ab7747207d47ab109a63.jpg", "Jupe moderne"),
+            ("Polo femme", "Femme", "Selon modèle", 20, "https://img.staticdj.com/114f431c819b1bc0f8c479ec78ccae6d_1080x.jpg", "Polo pour femme"),
+            ("Body seconde peau", "Femme", "Selon modèle", 19, "https://static.riachuelo.com.br/RCHLO/12366013001/portrait/body-cache-coeur-12366013_foto4_corpo.jpg", "Body seconde peau"),
+            ("Escarpins élégants", "Chaussures", "Selon modèle", 46, "https://iubitoeg.com/public/uploads/all/f4rbd2TRc10zl0aCxMZcGJQe1lwmYYpdFAgJrP1d.jpg", "Escarpins élégants"),
+            ("Baskets tendance", "Sport", "Selon modèle", 55, "https://cdn11.bigcommerce.com/s-21x65e8kfn/images/stencil/original/products/42957/192937/NEW694086_1000_6__99743.1688469678.jpg", "Baskets tendance"),
+            ("Sneakers New Balance", "Sport", "Selon modèle", 78, "https://cdn11.bigcommerce.com/s-21x65e8kfn/images/stencil/original/products/75255/390406/NEW695842_1000_13__58538.1737390021.jpg", "Sneakers New Balance")
+        ]
+        for name, category, color, price, image_url, description in catalogue:
+            exists = conn.execute("SELECT id FROM products WHERE name=?", (name,)).fetchone()
+            if exists:
+                continue
+            cur = conn.execute(
+                """INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description)
+                   VALUES(?,?,?,?,?,?,?)""",
+                (name, category, color, 0, price, image_url, description)
+            )
+            available_sizes = (
+                ('36','37','38','39','40','41','42','43','44','45')
+                if category in ('Chaussures','Sport') or name == "Chaussures urbaines"
+                else ('Unique',) if name == "Tissu imprimé premium" or name == "Pagne élégant"
+                else ('XS','S','M','L','XL','XXL')
+            )
+            for size in available_sizes:
+                # Stock à zéro : le gérant saisit les quantités réelles avant la vente.
+                conn.execute(
+                    "INSERT INTO stock(product_id,size,quantity) VALUES(?,?,0)",
+                    (cur.lastrowid, size)
+                )
         conn.commit()
     except mysql.connector.Error:
         conn.rollback()
