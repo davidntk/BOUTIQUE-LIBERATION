@@ -21,3 +21,51 @@ footer{background:#172f46;color:#d8d4cb;border:0;margin-top:0;padding:30px 15px}
 .product-info strong{color:#9b783e}
 .section-heading h1,.section-heading h2{color:#172f46}
 @media(max-width:650px){.topbar{padding:14px 5%}.topbar nav{row-gap:10px}}
+
+
+/* Fond plus profond et motifs décoratifs discrets */
+body{
+  background-color:#e8e4dc;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(200,169,107,.16) 0 2px, transparent 3px),
+    radial-gradient(circle at 88% 32%, rgba(23,47,70,.10) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 72% 82%, rgba(200,169,107,.13) 0 2px, transparent 3px),
+    linear-gradient(135deg, rgba(255,255,255,.22), transparent 45%, rgba(23,47,70,.035));
+  background-size:46px 46px,58px 58px,64px 64px,100% 100%;
+  background-attachment:fixed;
+}
+main{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+}
+main:before,main:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  border:1px solid rgba(166,132,72,.18);
+  border-radius:50%;
+}
+main:before{
+  width:340px;height:340px;
+  top:520px;left:-220px;
+  box-shadow:0 0 0 22px rgba(166,132,72,.035),0 0 0 46px rgba(166,132,72,.025);
+}
+main:after{
+  width:420px;height:420px;
+  top:1100px;right:-300px;
+  box-shadow:0 0 0 24px rgba(23,47,70,.025),0 0 0 50px rgba(23,47,70,.018);
+}
+.topbar{
+  background:rgba(248,246,241,.96);
+  border-bottom-color:#d8d0c2;
+  box-shadow:0 7px 26px rgba(23,35,46,.08);
+}
+.section{position:relative}
+.panel,.product-card,.category-card{
+  box-shadow:0 7px 22px rgba(23,35,46,.07);
+}
+@media(prefers-reduced-motion:reduce){
+  body{background-attachment:scroll}
+}
