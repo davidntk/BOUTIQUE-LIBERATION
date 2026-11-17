@@ -164,7 +164,21 @@ def index():
     if term:
         sql += " AND (p.name LIKE ? OR p.category LIKE ? OR p.color LIKE ?)"
         args += [f"%{term}%"] * 3
-    if category:
+    if category == "Chaussures":
+        # La colonne category sert aussi au genre (Homme/Femme).
+        # Retrouve donc les chaussures même si leur catégorie a été harmonisée.
+        sql += """ AND (
+            p.category='Chaussures'
+            OR p.name IN (
+                'Chaussures urbaines', 'Escarpins élégants', 'Mocassin Classic',
+                'Sneakers Urban', 'Basket Élégance', 'Sport Runner',
+                'Baskets tendance', 'Sneakers New Balance'
+            )
+        )"""
+    elif category == "Cuir":
+        # Les vestes en cuir ont parfois category='Homme' après correction du genre.
+        sql += " AND (p.category='Cuir' OR p.name LIKE '%cuir%')"
+    elif category:
         sql += " AND p.category=?"
         args.append(category)
     sql += " GROUP BY p.id ORDER BY p.id DESC"
