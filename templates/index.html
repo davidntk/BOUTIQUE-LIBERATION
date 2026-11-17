@@ -145,6 +145,23 @@ body{background:var(--bl-paper);color:var(--bl-green)}
 @media(max-width:950px){.store-hero-panel{min-height:380px}.store-hero-photo{min-height:380px}.product-image{height:220px}}
 @media(max-width:650px){.store-hero{padding:0 14px;margin-top:14px}.store-hero-panel{display:block;min-height:0}.store-hero-copy{padding:36px 27px 22px}.store-hero h1{font-size:43px}.store-hero-photo{min-height:235px;background-position:center 40%}.store-stamp{width:70px;height:70px;right:20px;top:20px}.section{padding:38px 15px}.category-cards{grid-template-columns:repeat(2,1fr)}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product-image{height:190px}.product-info{padding:11px;display:flex;flex-direction:column;align-items:flex-start}.product-info h3{font-size:12px}.product-info strong{font-size:14px}.product-bottom{padding:9px 11px;display:block}.buy-form{padding:10px}.buy-fields{gap:7px}.store-promo{margin:35px 14px;padding:25px;display:block}.store-promo h2{font-size:25px}}
 
+
+/* Arriere-plan editorial premium pour la page d'accueil */
+body{
+  background-color:#eee8df !important;
+  background-image:
+    linear-gradient(rgba(247,242,235,.78),rgba(247,242,235,.86)),
+    url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2200&q=85') !important;
+  background-size:cover !important;
+  background-position:center center !important;
+  background-attachment:fixed !important;
+  background-repeat:no-repeat !important;
+}
+main{background:transparent !important}
+.section{background:transparent !important}
+.category-card,.product-card{backdrop-filter:blur(3px)}
+@media(max-width:650px){body{background-attachment:scroll !important}}
+
 </style>
 
 <section class="store-hero">
