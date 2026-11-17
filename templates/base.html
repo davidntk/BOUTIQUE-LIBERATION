@@ -5,10 +5,32 @@
   <title>{% block title %}BOUTIQUE LIBERATION{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+<style>
+.announcement{background:#171417;color:#fff;text-align:center;padding:10px 16px;font-size:10px;letter-spacing:1.7px;text-transform:uppercase}
+.announcement b{color:#f6cf54}
+.topbar{position:sticky;top:0;z-index:20;min-height:78px;padding:14px max(20px,calc((100% - 1240px)/2));gap:22px;background:#fffdfbf2;backdrop-filter:blur(14px);box-shadow:0 5px 24px #21131a08}
+.brand{min-width:215px;gap:10px;letter-spacing:1.4px;color:#171417}
+.brand-mark{width:42px;height:42px;border:0;border-radius:14px 14px 14px 4px;background:#d73543;color:#fff;font-size:25px}
+.brand small{letter-spacing:3px;color:#777078}
+.header-search{display:flex;align-items:center;position:relative;flex:1;max-width:470px}
+.header-search span{position:absolute;left:16px;color:#81777c;font-size:19px}
+.header-search input{border:1px solid #eee8e7;border-radius:30px;background:#faf7f6;padding:12px 46px 12px 42px;min-width:0}
+.header-search input:focus{outline:0;border-color:#e9a4b5}
+.header-search button{position:absolute;right:5px;border:0;border-radius:50%;width:34px;height:34px;background:#171417;color:#fff}
+.topbar nav{gap:15px;font-size:11px;white-space:nowrap}
+.topbar nav a:hover{color:#d73543}
+.nav-login{border:1px solid #e9a4b5;padding:9px 13px;border-radius:24px;color:#171417}
+footer{background:#f6f0ef;color:#777078;border:0;margin-top:55px}
+@media(max-width:950px){.topbar{flex-wrap:wrap}.brand{min-width:190px}.header-search{order:3;flex-basis:100%;max-width:none}.topbar nav{margin-left:auto;flex-wrap:wrap}}
+@media(max-width:650px){.announcement{font-size:8px;letter-spacing:1px}.topbar{position:relative;padding:12px 15px;align-items:center;flex-direction:row}.brand{min-width:0;font-size:11px;flex:1}.brand small{font-size:8px}.brand-mark{width:38px;height:38px}.topbar nav{width:100%;margin:0;gap:8px 12px;font-size:10px}.header-search{order:3;flex-basis:100%}}
+</style>
 </head>
 <body>
+<div class="announcement">Bienvenue chez Boutique Libération <b>✦</b> La mode qui vous ressemble — Lubumbashi</div>
 <header class="topbar">
-  <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">BL</span><span>BOUTIQUE <b>LIBERATION</b><small>CHAUSSURES & STYLE</small></span></a>
+  <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">L</span><span>BOUTIQUE <b>LIBÉRATION</b><small>LUBUMBASHI · RDC</small></span></a>
+  <form class="header-search" method="get" action="{{ url_for('index') }}"><span>⌕</span><input type="search" name="q" placeholder="Rechercher un article, une catégorie…"><button type="submit" aria-label="Rechercher">↗</button></form>
   <nav><a href="{{ url_for('index') }}">Catalogue</a>{% if session.get('user_id') %}<a href="{{ url_for('dashboard') }}">Tableau de bord</a><a href="{{ url_for('products') }}">Produits</a><a href="{{ url_for('stock_page') }}">Stock</a><a href="{{ url_for('sales_page') }}">Ventes</a><a class="nav-login" href="{{ url_for('logout') }}">Déconnexion</a>{% else %}<a class="nav-login" href="{{ url_for('dashboard') }}">Administration</a>{% endif %}</nav>
 </header>
 {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="messages">{% for category,message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
