@@ -118,6 +118,7 @@ def init_db():
         # Les chaussures spécifiquement féminines apparaissent dans Femme,
         # et les modèles masculins dans Homme.
         genre_corrections = {
+            "Tissu imprimé premium": "Femme",
             "Chaussures urbaines": "Homme",
             "Veste en cuir urbaine": "Homme",
             "Escarpins élégants": "Femme",
