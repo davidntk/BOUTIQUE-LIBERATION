@@ -164,25 +164,41 @@ def index():
     if term:
         sql += " AND (p.name LIKE ? OR p.category LIKE ? OR p.color LIKE ?)"
         args += [f"%{term}%"] * 3
+    shoe_names = (
+        'Chaussures urbaines', 'Escarpins élégants', 'Mocassin Classic',
+        'Sneakers Urban', 'Basket Élégance', 'Sport Runner',
+        'Baskets tendance', 'Sneakers New Balance'
+    )
+    sport_names = ('Sneakers Urban', 'Sport Runner', 'Baskets tendance', 'Sneakers New Balance')
     if category == "Chaussures":
-        # La colonne category sert aussi au genre (Homme/Femme).
-        # Retrouve donc les chaussures même si leur catégorie a été harmonisée.
-        sql += """ AND (
-            p.category='Chaussures'
-            OR p.name IN (
-                'Chaussures urbaines', 'Escarpins élégants', 'Mocassin Classic',
-                'Sneakers Urban', 'Basket Élégance', 'Sport Runner',
-                'Baskets tendance', 'Sneakers New Balance'
-            )
-        )"""
+        sql += " AND p.name IN ('Chaussures urbaines','Escarpins élégants','Mocassin Classic','Basket Élégance')"
+    elif category == "Sport":
+        sql += " AND p.name IN ('Sneakers Urban','Sport Runner','Baskets tendance','Sneakers New Balance')"
     elif category == "Cuir":
-        # Les vestes en cuir ont parfois category='Homme' après correction du genre.
         sql += " AND (p.category='Cuir' OR p.name LIKE '%cuir%')"
+    elif category in ("Homme", "Femme"):
+        sql += " AND p.category=? AND p.name NOT IN (" + ",".join(["?"] * len(shoe_names)) + ")"
+        args.extend([category, *shoe_names])
     elif category:
         sql += " AND p.category=?"
         args.append(category)
     sql += " GROUP BY p.id ORDER BY p.id DESC"
     products = db().execute(sql, args).fetchall()
+    # Catégorie d'affichage dédiée : le champ historique category contient
+    # aussi le genre pour certains produits, donc on classe les chaussures ici.
+    display_categories = {
+        "Chaussures urbaines": "Chaussures",
+        "Escarpins élégants": "Chaussures",
+        "Mocassin Classic": "Chaussures",
+        "Basket Élégance": "Chaussures",
+        "Sneakers Urban": "Sport",
+        "Sport Runner": "Sport",
+        "Baskets tendance": "Sport",
+        "Sneakers New Balance": "Sport",
+        "Veste en cuir urbaine": "Cuir"
+    }
+    for product in products:
+        product["display_category"] = display_categories.get(product["name"], product["category"])
     sizes = db().execute("SELECT product_id,size,quantity FROM stock ORDER BY size").fetchall()
     by_product = {}
     for row in sizes:
