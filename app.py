@@ -66,7 +66,7 @@ def init_db():
                 ('Sneakers Urban', 'Homme', 'Blanc', 18, 35, '', 'Chaussure urbaine'),
                 ('Basket Élégance', 'Femme', 'Noir', 20, 39, '', 'Style quotidien'),
                 ('Sport Runner', 'Sport', 'Bleu', 22, 42, '', 'Chaussure de sport'),
-                ('Mocassin Classic', 'Cuir', 'Marron', 25, 48, '', 'Chaussure classique')
+                ('Mocassin Classic', 'Homme', 'Marron', 25, 48, 'https://acdn-us.mitiendanube.com/stores/001/668/651/products/202206-copy-2-0455f59495a5a18afd17209011273156-1024-1024.webp', 'Chaussure classique')
             ]
             for product in samples:
                 cur = conn.execute('INSERT INTO products(name,category,color,purchase_price,sale_price,image_url,description) VALUES(?,?,?,?,?,?,?)', product)
@@ -128,6 +128,10 @@ def init_db():
         }
         for product_name, genre in genre_corrections.items():
             conn.execute("UPDATE products SET category=? WHERE name=?", (genre, product_name))
+
+        # Restaure la photo du mocassin même si le produit existe déjà en base.
+        conn.execute("""UPDATE products SET image_url=? WHERE name=? AND (image_url IS NULL OR image_url='')""",
+                     ('https://acdn-us.mitiendanube.com/stores/001/668/651/products/202206-copy-2-0455f59495a5a18afd17209011273156-1024-1024.webp', 'Mocassin Classic'))
 
         conn.commit()
     except mysql.connector.Error:
