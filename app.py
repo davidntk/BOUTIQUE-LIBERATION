@@ -141,6 +141,8 @@ def init_db():
                      ('https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=900&q=85', 'Sport Runner'))
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
                      ('https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=900&q=85', 'Sneakers Urban'))
+        conn.execute("UPDATE products SET image_url=? WHERE name=?",
+                     ('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85', 'Basket Élégance'))
 
         conn.commit()
     except mysql.connector.Error:
