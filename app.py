@@ -206,8 +206,15 @@ def index():
         "Sneakers New Balance": "Sport",
         "Veste en cuir urbaine": "Cuir"
     }
+    product_images = {
+        "Sport Runner": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=900&q=85",
+        "Sneakers Urban": "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=900&q=85",
+        "Basket Élégance": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85"
+    }
     for product in products:
         product["display_category"] = display_categories.get(product["name"], product["category"])
+        if product["name"] in product_images:
+            product["image_url"] = product_images[product["name"]]
     sizes = db().execute("SELECT product_id,size,quantity FROM stock ORDER BY size").fetchall()
     by_product = {}
     for row in sizes:
