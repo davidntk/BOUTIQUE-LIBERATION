@@ -114,6 +114,21 @@ def init_db():
                     "INSERT INTO stock(product_id,size,quantity) VALUES(?,?,0)",
                     (cur.lastrowid, size)
                 )
+        # Harmonise le genre des articles du catalogue déjà présents en base.
+        # Les chaussures spécifiquement féminines apparaissent dans Femme,
+        # et les modèles masculins dans Homme.
+        genre_corrections = {
+            "Chaussures urbaines": "Homme",
+            "Veste en cuir urbaine": "Homme",
+            "Escarpins élégants": "Femme",
+            "Baskets tendance": "Femme",
+            "Mocassin Classic": "Homme",
+            "Sneakers Urban": "Homme",
+            "Basket Élégance": "Femme"
+        }
+        for product_name, genre in genre_corrections.items():
+            conn.execute("UPDATE products SET category=? WHERE name=?", (genre, product_name))
+
         conn.commit()
     except mysql.connector.Error:
         conn.rollback()
