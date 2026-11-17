@@ -138,9 +138,9 @@ def init_db():
         # Attribue deux photos distinctes aux deux modèles de chaussures.
         # Mise à jour systématique pour corriger aussi les anciennes photos déjà enregistrées.
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
-                     ('https://www.colehaan.co.jp/dw/image/v2/BCKS_PRD/on/demandware.static/-/Sites-master-catalog-ch/default/dwb9cbe795/images/large/zz-C35001-5.jpg?sw=1020', 'Sport Runner'))
+                     ('https://images.squarespace-cdn.com/content/v1/5b8c557c8f51308965aa6dd8/1626272853910-352ZLN7AKORK91LLKD1B/ESGRAINEDWHITE.jpg', 'Sport Runner'))
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
-                     ('https://calzaturedelprete.com/cdn/shop/collections/DSC06986.webp?v=1750070722&width=1080', 'Sneakers Urban'))
+                     ('https://uniformstandard.com/cdn/shop/files/Relaxed_Sneaker_Triple_Navy_Leather_2.jpg?v=1765319075&width=2000', 'Sneakers Urban'))
         conn.execute("UPDATE products SET image_url=? WHERE name=?",
                      ('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85', 'Basket Élégance'))
 
@@ -207,8 +207,8 @@ def index():
         "Veste en cuir urbaine": "Cuir"
     }
     product_images = {
-        "Sport Runner": "https://www.colehaan.co.jp/dw/image/v2/BCKS_PRD/on/demandware.static/-/Sites-master-catalog-ch/default/dwb9cbe795/images/large/zz-C35001-5.jpg?sw=1020",
-        "Sneakers Urban": "https://calzaturedelprete.com/cdn/shop/collections/DSC06986.webp?v=1750070722&width=1080",
+        "Sport Runner": "https://images.squarespace-cdn.com/content/v1/5b8c557c8f51308965aa6dd8/1626272853910-352ZLN7AKORK91LLKD1B/ESGRAINEDWHITE.jpg",
+        "Sneakers Urban": "https://uniformstandard.com/cdn/shop/files/Relaxed_Sneaker_Triple_Navy_Leather_2.jpg?v=1765319075&width=2000",
         "Basket Élégance": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85"
     }
     for product in products:
