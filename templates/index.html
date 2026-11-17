@@ -205,11 +205,12 @@ body{background:var(--bl-paper);color:var(--bl-green)}
   <article class="product-card">
    <div class="product-image">
     {% if p.image_url %}<img loading="lazy" src="{{ p.image_url }}" alt="{{ p.name }}">
-    {% elif p.category == 'Femme' %}<img loading="lazy" src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=85" alt="Chaussures pour femme">
-    {% elif p.category == 'Cuir' %}<img loading="lazy" src="https://images.unsplash.com/photo-1548764703-22c55cbd8210?auto=format&fit=crop&fm=jpg&q=85&w=1000" alt="Chaussures en cuir">
-    {% elif p.category == 'Sport' %}<img loading="lazy" src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=85" alt="Baskets de sport">
-    {% else %}<img loading="lazy" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85" alt="Chaussures tendance">{% endif %}
-    <span class="tag">{{ p.category }}</span>
+    {% elif p.display_category == 'Femme' %}<img loading="lazy" src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=85" alt="Article de la collection femme">
+    {% elif p.display_category == 'Cuir' %}<img loading="lazy" src="https://images.unsplash.com/photo-1548764703-22c55cbd8210?auto=format&fit=crop&fm=jpg&q=85&w=1000" alt="Article en cuir">
+    {% elif p.display_category == 'Sport' %}<img loading="lazy" src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=85" alt="Baskets de sport">
+    {% elif p.display_category == 'Chaussures' %}<img loading="lazy" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85" alt="Chaussures tendance">
+    {% else %}<img loading="lazy" src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=800&q=85" alt="Vêtement de la collection">{% endif %}
+    <span class="tag">{{ p.display_category }}</span>
    </div>
    <div class="product-info"><div><h3>{{ p.name }}</h3><p>{{ p.color or 'Collection Libération' }}</p></div><strong>{{ '%.2f'|format(p.sale_price) }} $</strong></div>
    <div class="product-bottom"><span class="{% if p.total_stock<=2 %}low{% endif %}">{% if p.total_stock > 0 %}{{ p.total_stock }} paire(s) disponible(s){% else %}Disponible sur commande{% endif %}</span>
