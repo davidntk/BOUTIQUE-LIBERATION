@@ -69,3 +69,8 @@ CREATE TABLE IF NOT EXISTS suppliers (
   address VARCHAR(255) DEFAULT ''
 ) ENGINE=InnoDB;
 
+-- Champs NetiKash (app.py les ajoute automatiquement aux bases existantes).
+ALTER TABLE sales
+  ADD COLUMN payment_status VARCHAR(30) NOT NULL DEFAULT 'paid',
+  ADD COLUMN netikash_request_id VARCHAR(255) NULL,
+  ADD COLUMN netikash_ref VARCHAR(100) NULL;
