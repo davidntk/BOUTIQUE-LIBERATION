@@ -57,12 +57,14 @@ def netikash_api_request(method, path, **kwargs):
     return response.json()
 
 def netikash_request_id(payload):
-    for key in ("trans_id","trans","request_id","id"):
+    for key in ("trans_id","request_id","id"):
         if payload.get(key):
             return str(payload[key])
     link = urlparse(payload.get("link",""))
     if link.scheme == "https" and link.netloc.endswith("netikash.com"):
         return link.path.rstrip("/").split("/")[-1]
+    if payload.get("trans"):
+        return str(payload["trans"])
     return None
 
 def netikash_payment_status(request_id):
@@ -372,7 +374,7 @@ def buy_product(product_id):
             conn.execute("UPDATE sales SET netikash_request_id=? WHERE id=?",(request_id,sale_id))
             conn.commit()
             return redirect(link)
-        except (requests.RequestException,ValueError,RuntimeError,KeyError):
+        except (requests.RequestException,ValueError,RuntimeError,KeyError,mysql.connector.Error):
             apply_netikash_status(sale_id,"failed")
             app.logger.exception("Création paiement NetiKash échouée pour commande %s",sale_id)
             flash("Impossible de démarrer le paiement NetiKash. Réessaie ou contacte la boutique.","error")
@@ -445,8 +447,8 @@ def dashboard():
     products_count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
     stock_count = conn.execute("SELECT COALESCE(SUM(quantity),0) FROM stock").fetchone()[0]
     today = datetime.now().strftime("%Y-%m-%d")
-    today_sales = conn.execute("SELECT COUNT(*) FROM sales WHERE DATE(created_at)=?", (today,)).fetchone()[0]
-    revenue = conn.execute("SELECT COALESCE(SUM(total),0) FROM sales WHERE DATE(created_at)=?", (today,)).fetchone()[0]
+    today_sales = conn.execute("SELECT COUNT(*) FROM sales WHERE DATE(created_at)=? AND payment_status='paid'", (today,)).fetchone()[0]
+    revenue = conn.execute("SELECT COALESCE(SUM(total),0) FROM sales WHERE DATE(created_at)=? AND payment_status='paid'", (today,)).fetchone()[0]
     low_stock = conn.execute("""SELECT p.name,s.size,s.quantity FROM stock s JOIN products p ON p.id=s.product_id
                                 WHERE s.quantity<=2 ORDER BY s.quantity,p.name LIMIT 12""").fetchall()
     recent = conn.execute("SELECT * FROM sales ORDER BY id DESC LIMIT 8").fetchall()
