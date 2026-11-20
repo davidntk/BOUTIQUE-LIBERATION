@@ -1,4 +1,10 @@
 import os
+import base64
+import hashlib
+import hmac
+import json
+from urllib.parse import urlparse
+import requests
 import mysql.connector
 from functools import wraps
 from datetime import datetime
@@ -15,6 +21,84 @@ MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
 MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "boutique_liberation")
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key-before-deployment")
+
+NETIKASH_CLIENT_ID = os.environ.get("NETIKASH_CLIENT_ID", "").strip()
+NETIKASH_CLIENT_SECRET = os.environ.get("NETIKASH_CLIENT_SECRET", "").strip()
+NETIKASH_ENV = os.environ.get("NETIKASH_ENV", "").strip().lower()
+NETIKASH_AUTH_URL = os.environ.get("NETIKASH_AUTH_URL", "https://accounts.netikash.com/oauth2/token").strip()
+NETIKASH_API_BASE_URL = os.environ.get("NETIKASH_API_BASE_URL", "").strip().rstrip("/")
+NETIKASH_CURRENCY = os.environ.get("NETIKASH_CURRENCY", "USD").strip().upper()
+NETIKASH_WEBHOOK_SECRET = os.environ.get("NETIKASH_WEBHOOK_SECRET", "").strip()
+
+def netikash_is_configured():
+    return bool(NETIKASH_CLIENT_ID and NETIKASH_CLIENT_SECRET
+                and NETIKASH_ENV in ("sandbox", "production")
+                and NETIKASH_API_BASE_URL and NETIKASH_CURRENCY in ("USD", "CDF"))
+
+def netikash_access_token():
+    if not NETIKASH_CLIENT_ID or not NETIKASH_CLIENT_SECRET:
+        raise RuntimeError("Les identifiants NetiKash ne sont pas configurés.")
+    credentials = base64.b64encode(f"{NETIKASH_CLIENT_ID}:{NETIKASH_CLIENT_SECRET}".encode()).decode("ascii")
+    response = requests.post(NETIKASH_AUTH_URL, json={"grant_type":"client_credentials"},
+        headers={"Authorization":f"Basic {credentials}","Content-Type":"application/json","Accept":"application/json"}, timeout=25)
+    response.raise_for_status()
+    token = response.json().get("access_token")
+    if not token:
+        raise RuntimeError("NetiKash n'a pas retourné de jeton d'accès.")
+    return token
+
+def netikash_api_request(method, path, **kwargs):
+    if not NETIKASH_API_BASE_URL:
+        raise RuntimeError("URL API NetiKash non configurée.")
+    headers = kwargs.pop("headers", {})
+    headers.update({"Authorization":f"Bearer {netikash_access_token()}","Accept":"application/json"})
+    response = requests.request(method, NETIKASH_API_BASE_URL + path, headers=headers, timeout=30, **kwargs)
+    response.raise_for_status()
+    return response.json()
+
+def netikash_request_id(payload):
+    for key in ("trans_id","trans","request_id","id"):
+        if payload.get(key):
+            return str(payload[key])
+    link = urlparse(payload.get("link",""))
+    if link.scheme == "https" and link.netloc.endswith("netikash.com"):
+        return link.path.rstrip("/").split("/")[-1]
+    return None
+
+def netikash_payment_status(request_id):
+    payload = netikash_api_request("GET","/api/v1/trs/transactions/requests/" + requests.utils.quote(str(request_id),safe=""))
+    data = payload.get("data") if isinstance(payload.get("data"),dict) else payload
+    return str(data.get("status","")).lower()
+
+def apply_netikash_status(sale_id, status):
+    conn = db()
+    conn.execute("SELECT id FROM sales WHERE id=? FOR UPDATE",(sale_id,)).fetchone()
+    sale = conn.execute("SELECT payment_status FROM sales WHERE id=?",(sale_id,)).fetchone()
+    if not sale:
+        conn.rollback()
+        return False
+    current, normalized = str(sale.get("payment_status","pending")).lower(), str(status).lower()
+    if normalized in ("approved","completed","success","paid","cashed"):
+        if current == "pending":
+            conn.execute("UPDATE sales SET payment_status='paid' WHERE id=?",(sale_id,))
+            conn.commit()
+        else:
+            conn.rollback()
+        return True
+    if normalized in ("failed","expired","canceled","cancelled"):
+        if current == "pending":
+            items = conn.execute("SELECT product_id,size,quantity FROM sale_items WHERE sale_id=?",(sale_id,)).fetchall()
+            for item in items:
+                conn.execute("UPDATE stock SET quantity=quantity+? WHERE product_id=? AND size=?",(item["quantity"],item["product_id"],item["size"]))
+                conn.execute("INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
+                    (item["product_id"],item["size"],item["quantity"],"ENTREE","Libération réservation NetiKash #"+str(sale_id)))
+            conn.execute("UPDATE sales SET payment_status=? WHERE id=?",(normalized,sale_id))
+            conn.commit()
+        else:
+            conn.rollback()
+        return False
+    conn.rollback()
+    return False
 
 class HybridRow(dict):
     def __getitem__(self, key):
@@ -41,11 +125,24 @@ class MySQLConnectionAdapter:
     def rollback(self): self.connection.rollback()
     def close(self): self.connection.close()
 
+_payment_schema_ready = False
+
 def db():
+    global _payment_schema_ready
     if 'db' not in g:
         connection = mysql.connector.connect(host=MYSQL_HOST, port=MYSQL_PORT, user=MYSQL_USER,
             password=MYSQL_PASSWORD, database=MYSQL_DATABASE, charset='utf8mb4', autocommit=False)
         g.db = MySQLConnectionAdapter(connection)
+        if not _payment_schema_ready:
+            for column, definition in (
+                ("payment_status","VARCHAR(30) NOT NULL DEFAULT 'paid'"),
+                ("netikash_request_id","VARCHAR(255) NULL"),
+                ("netikash_ref","VARCHAR(100) NULL")
+            ):
+                if not g.db.execute("SHOW COLUMNS FROM sales LIKE ?",(column,)).fetchone():
+                    g.db.execute(f"ALTER TABLE sales ADD COLUMN {column} {definition}")
+            g.db.commit()
+            _payment_schema_ready = True
     return g.db
 
 @app.teardown_appcontext
@@ -226,56 +323,110 @@ def index():
 
 @app.route("/acheter/<int:product_id>", methods=["POST"])
 def buy_product(product_id):
-    """Permet au client de commander directement depuis le catalogue public."""
     conn = db()
     try:
-        size = request.form.get("size", "").strip()
-        qty = int(request.form.get("quantity", "1"))
-        customer = request.form.get("customer_name", "").strip() or "Client en ligne"
-        phone = request.form.get("phone", "").strip()
-        payment = request.form.get("payment_method", "Paiement à la livraison")
-        allowed_payments = ("Espèces", "Airtel Money", "Orange Money", "M-Pesa", "Paiement à la livraison")
-        if qty < 1 or payment not in allowed_payments or not size:
+        size=request.form.get("size","").strip()
+        qty=int(request.form.get("quantity","1"))
+        customer=request.form.get("customer_name","").strip() or "Client en ligne"
+        phone=request.form.get("phone","").strip()
+        payment=request.form.get("payment_method","Paiement à la livraison")
+        allowed=("Espèces","Airtel Money","Orange Money","M-Pesa","Paiement à la livraison","NetiKash")
+        if qty<1 or payment not in allowed or not size:
             raise ValueError("Vérifie la pointure, la quantité et le mode de paiement.")
-        product = conn.execute("SELECT * FROM products WHERE id=?", (product_id,)).fetchone()
-        stock_row = conn.execute(
-            "SELECT quantity FROM stock WHERE product_id=? AND size=?",
-            (product_id, size)
-        ).fetchone()
+        if payment=="NetiKash" and not netikash_is_configured():
+            raise ValueError("NetiKash n'est pas configuré. La boutique doit confirmer Sandbox ou Production et renseigner les paramètres serveur.")
+        product=conn.execute("SELECT * FROM products WHERE id=?",(product_id,)).fetchone()
+        stock_row=conn.execute("SELECT quantity FROM stock WHERE product_id=? AND size=?",(product_id,size)).fetchone()
         if not product or not stock_row:
             raise ValueError("Ce produit ou cette taille n'existe pas.")
-        # Si le stock est à zéro, enregistrer une commande sur demande sans
-        # décrémenter l'inventaire. Si un stock positif existe, le respecter.
-        order_on_request = stock_row["quantity"] == 0
-        if stock_row["quantity"] > 0 and stock_row["quantity"] < qty:
+        if stock_row["quantity"]<qty:
+            if payment=="NetiKash" and stock_row["quantity"]==0:
+                raise ValueError("Cette taille est sur demande. Contacte la boutique pour confirmer sa disponibilité avant de payer.")
             raise ValueError("Quantité supérieure au stock disponible.")
-        total = product["sale_price"] * qty
-        cur = conn.execute(
-            "INSERT INTO sales(customer_name,phone,total,payment_method) VALUES(?,?,?,?)",
-            (customer, phone, total, payment)
-        )
-        conn.execute(
-            "INSERT INTO sale_items(sale_id,product_id,size,quantity,unit_price) VALUES(?,?,?,?,?)",
-            (cur.lastrowid, product_id, size, qty, product["sale_price"])
-        )
-        if not order_on_request:
-            conn.execute(
-                "UPDATE stock SET quantity=quantity-? WHERE product_id=? AND size=?",
-                (qty, product_id, size)
-            )
-            conn.execute(
-                "INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
-                (product_id, size, qty, "SORTIE", "Commande client en ligne #" + str(cur.lastrowid))
-            )
+        total=float(product["sale_price"])*qty
+        cur=conn.execute("INSERT INTO sales(customer_name,phone,total,payment_method,payment_status) VALUES(?,?,?,?,?)",
+            (customer,phone,total,payment,"pending" if payment=="NetiKash" else "paid"))
+        sale_id=cur.lastrowid
+        conn.execute("INSERT INTO sale_items(sale_id,product_id,size,quantity,unit_price) VALUES(?,?,?,?,?)",
+            (sale_id,product_id,size,qty,product["sale_price"]))
+        conn.execute("UPDATE stock SET quantity=quantity-? WHERE product_id=? AND size=?",(qty,product_id,size))
+        conn.execute("INSERT INTO movements(product_id,size,quantity,kind,reason) VALUES(?,?,?,?,?)",
+            (product_id,size,qty,"SORTIE",("Réservation paiement NetiKash #" if payment=="NetiKash" else "Commande client en ligne #")+str(sale_id)))
+        if payment!="NetiKash":
+            conn.commit()
+            flash("Commande enregistrée avec succès ! Votre numéro de commande est #"+str(sale_id),"success")
+            return redirect(url_for("index")+"#catalogue")
+        ref="BL-"+str(sale_id)
+        conn.execute("UPDATE sales SET netikash_ref=? WHERE id=?",(ref,sale_id))
         conn.commit()
-        if order_on_request:
-            flash("Demande de commande enregistrée ! Cette taille est à confirmer avec la boutique. Référence #" + str(cur.lastrowid), "success")
-        else:
-            flash("Commande enregistrée avec succès ! Votre numéro de commande est #" + str(cur.lastrowid), "success")
-    except (ValueError, KeyError, mysql.connector.Error) as exc:
+        try:
+            response=netikash_api_request("POST","/api/v1/trs/transactions/requests/cli-payments",
+                json={"amount":total,"currency":NETIKASH_CURRENCY,"ref":ref,
+                      "referer_url":url_for("netikash_return",sale_id=sale_id,_external=True)},
+                headers={"Content-Type":"application/json"})
+            link=response.get("link")
+            request_id=netikash_request_id(response)
+            parsed=urlparse(link or "")
+            if not link or parsed.scheme!="https" or not parsed.netloc.endswith("netikash.com") or not request_id:
+                raise RuntimeError("Réponse NetiKash invalide : lien ou identifiant manquant.")
+            conn.execute("UPDATE sales SET netikash_request_id=? WHERE id=?",(request_id,sale_id))
+            conn.commit()
+            return redirect(link)
+        except (requests.RequestException,ValueError,RuntimeError,KeyError):
+            apply_netikash_status(sale_id,"failed")
+            app.logger.exception("Création paiement NetiKash échouée pour commande %s",sale_id)
+            flash("Impossible de démarrer le paiement NetiKash. Réessaie ou contacte la boutique.","error")
+            return redirect(url_for("index")+"#catalogue")
+    except (ValueError,KeyError,mysql.connector.Error) as exc:
         conn.rollback()
-        flash(str(exc) or "Impossible d'enregistrer la commande.", "error")
-    return redirect(url_for("index") + "#catalogue")
+        flash(str(exc) or "Impossible d'enregistrer la commande.","error")
+        return redirect(url_for("index")+"#catalogue")
+
+@app.route("/paiement/netikash/retour/<int:sale_id>")
+def netikash_return(sale_id):
+    sale=db().execute("SELECT * FROM sales WHERE id=? AND payment_method='NetiKash'",(sale_id,)).fetchone()
+    if not sale:
+        abort(404)
+    if sale.get("payment_status")=="pending" and sale.get("netikash_request_id"):
+        try:
+            apply_netikash_status(sale_id,netikash_payment_status(sale["netikash_request_id"]))
+            sale=db().execute("SELECT * FROM sales WHERE id=?",(sale_id,)).fetchone()
+        except (requests.RequestException,ValueError,RuntimeError,KeyError):
+            app.logger.exception("Vérification NetiKash impossible pour commande %s",sale_id)
+    status=sale.get("payment_status","pending")
+    if status=="paid":
+        flash("Paiement confirmé par NetiKash. Merci pour votre commande #"+str(sale_id)+" !","success")
+    elif status=="pending":
+        flash("Paiement en attente de confirmation. Ne recommence pas le paiement; la boutique vérifiera la transaction.","error")
+    else:
+        flash("Le paiement n'a pas été confirmé. La réservation de stock a été libérée.","error")
+    return redirect(url_for("index")+"#catalogue")
+
+@app.route("/api/netikash/webhook",methods=["POST"])
+def netikash_webhook():
+    if not NETIKASH_WEBHOOK_SECRET:
+        abort(503)
+    raw=request.get_data(cache=True)
+    signature=request.headers.get("X-Signature","")
+    expected=base64.b64encode(hmac.new(NETIKASH_WEBHOOK_SECRET.encode(),raw,hashlib.sha256).digest()).decode("ascii")
+    if not signature or not hmac.compare_digest(expected,signature):
+        abort(401)
+    try:
+        event=json.loads(raw.decode("utf-8"))
+        sale=db().execute("SELECT id,netikash_request_id FROM sales WHERE netikash_ref=? AND payment_method='NetiKash'",(str(event.get("ref","")),)).fetchone()
+        if not sale:
+            return {"received":True,"matched":False},200
+        trx=str(event.get("trx",""))
+        if trx and sale.get("netikash_request_id") and trx!=sale["netikash_request_id"]:
+            abort(400)
+        request_id=sale.get("netikash_request_id") or trx
+        if not request_id:
+            abort(400)
+        apply_netikash_status(sale["id"],netikash_payment_status(request_id))
+        return {"received":True},200
+    except (ValueError,UnicodeDecodeError,requests.RequestException,RuntimeError,KeyError):
+        app.logger.exception("Erreur webhook NetiKash")
+        return {"received":False},500
 
 @app.route("/login", methods=["GET","POST"])
 def login():
