@@ -9,6 +9,7 @@ import mysql.connector
 from functools import wraps
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, abort
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -20,6 +21,8 @@ MYSQL_USER = os.environ.get("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
 MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "boutique_liberation")
 app = Flask(__name__)
+# Respecte le HTTPS et le nom de domaine transmis par le proxy Render.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key-before-deployment")
 
 NETIKASH_CLIENT_ID = os.environ.get("NETIKASH_CLIENT_ID", "").strip()
@@ -61,7 +64,7 @@ def netikash_request_id(payload):
         if payload.get(key):
             return str(payload[key])
     link = urlparse(payload.get("link",""))
-    if link.scheme == "https" and link.netloc.endswith("netikash.com"):
+    if link.scheme == "https" and link.hostname and (link.hostname == "netikash.com" or link.hostname.endswith(".netikash.com")):
         return link.path.rstrip("/").split("/")[-1]
     if payload.get("trans"):
         return str(payload["trans"])
@@ -369,7 +372,7 @@ def buy_product(product_id):
             link=response.get("link")
             request_id=netikash_request_id(response)
             parsed=urlparse(link or "")
-            if not link or parsed.scheme!="https" or not parsed.netloc.endswith("netikash.com") or not request_id:
+            if not link or parsed.scheme!="https" or not parsed.hostname or not (parsed.hostname=="netikash.com" or parsed.hostname.endswith(".netikash.com")) or not request_id:
                 raise RuntimeError("Réponse NetiKash invalide : lien ou identifiant manquant.")
             conn.execute("UPDATE sales SET netikash_request_id=? WHERE id=?",(request_id,sale_id))
             conn.commit()
